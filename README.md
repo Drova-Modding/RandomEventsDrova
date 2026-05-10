@@ -4,6 +4,8 @@ A [MelonLoader](https://melonwiki.xyz/) mod for **Drova – Forsaken Kin** that 
 
 Built on top of the [Drova Modding API](https://github.com/Drova-Modding/Drova-Modding-API).
 
+> **Players:** see [docs/Encounters.md](docs/Encounters.md) for the full list of creatures, regions, level ranges and group sizes.
+
 ## What it does
 
 While you play, the mod registers two kinds of events with the game's `WorldEventSystemManager`:
