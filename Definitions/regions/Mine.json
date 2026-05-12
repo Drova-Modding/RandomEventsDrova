@@ -1,0 +1,13 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "StoneFist",            "minLevel": 12, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "StoneFist_DeepMine",   "minLevel": 22, "maxLevel": 40, "weight": 0.7, "baseCount": 1, "countGrowth": 1 },
+    { "bandit":   "Human_Bandit_Mine_01", "minLevel": 5,  "maxLevel": 25, "weight": 1.5, "baseCount": 2, "countGrowth": 3 },
+    { "bandit":   "Human_Bandit_Mine_02", "minLevel": 8,  "maxLevel": 28, "weight": 1.2, "baseCount": 1, "countGrowth": 2 },
+    { "bandit":   "Human_Bandit_Mine_03", "minLevel": 14, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+  ]
+}

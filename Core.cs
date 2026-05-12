@@ -25,7 +25,7 @@ namespace RandomEvents
             if (sceneName != SceneNames.GameplayMain) return;
             if (_registered) return;
 
-            EncounterDefinitions.BuildPlaceholders();
+            EncounterDefinitions.Load();
 
             // Global random events — fired by the API's cooldown timer.
             foreach (var pool in EncounterDefinitions.GlobalPools)

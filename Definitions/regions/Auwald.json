@@ -1,0 +1,12 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "Bloodquito_Auwald",     "minLevel": 6,  "maxLevel": 30, "weight": 2.0, "baseCount": 2, "countGrowth": 4 },
+    { "creature": "BigSpider",             "minLevel": 10, "maxLevel": 35, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "Sprigga_Young_Normal",  "minLevel": 8,  "maxLevel": 25, "weight": 1.0, "baseCount": 2, "countGrowth": 2 },
+    { "creature": "Sprigga",               "minLevel": 20, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 1 }
+  ]
+}

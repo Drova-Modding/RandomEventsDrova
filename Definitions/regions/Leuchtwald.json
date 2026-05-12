@@ -1,0 +1,14 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "BigSpider_Leuchtwald_Spot_01", "minLevel": 12, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "BigSpider_Leuchtwald_Spot_02", "minLevel": 12, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "Boar_Luminous",                "minLevel": 15, "maxLevel": 40, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "LightBear",                    "minLevel": 22, "maxLevel": 40, "weight": 0.7, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "Snapper",                      "minLevel": 1,  "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "MortarShroom",                 "minLevel": 1,  "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+  ]
+}

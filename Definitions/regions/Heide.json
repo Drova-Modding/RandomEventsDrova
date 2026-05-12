@@ -1,0 +1,12 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 5,
+  "entries": [
+    { "creature": "Boar",          "minLevel": 5,  "maxLevel": 18, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "GreatTusk",     "minLevel": 28, "maxLevel": 40, "weight": 0.3, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "ShadowRipper",  "minLevel": 28, "maxLevel": 40, "weight": 0.3, "baseCount": 1, "countGrowth": 3 },
+    { "creature": "Bear",          "minLevel": 10, "maxLevel": 40, "weight": 0.3, "baseCount": 1, "countGrowth": 3 }
+  ]
+}

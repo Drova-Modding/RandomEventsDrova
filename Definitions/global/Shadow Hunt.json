@@ -1,0 +1,11 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "ShadowRipper",        "minLevel": 20, "maxLevel": 40, "weight": 1.5, "baseCount": 1, "countGrowth": 5 },
+    { "creature": "ShadowRipper_Ambush", "minLevel": 22, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 5 },
+    { "creature": "EliteRipper",         "minLevel": 30, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 10 }
+  ]
+}

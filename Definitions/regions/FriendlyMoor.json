@@ -1,0 +1,14 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.75,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 6,
+  "entries": [
+    { "creature": "Frog_Melee",          "minLevel": 1,  "maxLevel": 18, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "Frog_Ranged",         "minLevel": 1,  "maxLevel": 15, "weight": 1.0, "baseCount": 2, "countGrowth": 2 },
+    { "creature": "Bloodquito_Rotmoor",  "minLevel": 1,  "maxLevel": 15, "weight": 1.0, "baseCount": 2, "countGrowth": 2 },
+    { "creature": "Harpy",               "minLevel": 25, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "Foglet_Weak",         "minLevel": 5,  "maxLevel": 40, "weight": 1.0, "baseCount": 2, "countGrowth": 4 },
+    { "creature": "Foglet",              "minLevel": 20, "maxLevel": 40, "weight": 1.0, "baseCount": 2, "countGrowth": 4 }
+  ]
+}

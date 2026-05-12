@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Drova-Modding/RandomEvents/Definitions/encounter.schema.json",
+  "title": "RandomEvents Encounter Pool",
+  "description": "Defines one encounter pool for the RandomEvents Drova mod. Drop this file under regions/<Region>.json or global/<AnyName>.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "skipChance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.25,
+      "description": "Chance the pool is skipped entirely when triggered (0.0 = always run, 1.0 = never run)."
+    },
+    "minTypesAtLow": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Distinct creature/bandit types selected per spawn at player level 1."
+    },
+    "maxTypesAtHigh": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "Distinct creature/bandit types selected per spawn at player level 40."
+    },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        { "required": ["creature"], "not": { "required": ["bandit"] } },
+        { "required": ["bandit"],   "not": { "required": ["creature"] } }
+      ],
+      "properties": {
+        "creature": {
+          "description": "Field name on Drova_Modding_API.Access.AddressableAccess.Creatures.",
+          "$ref": "#/$defs/creatureName"
+        },
+        "bandit": {
+          "description": "Field name on Drova_Modding_API.Access.AddressableAccess.Bandits.",
+          "$ref": "#/$defs/banditName"
+        },
+        "minLevel":    { "type": "integer", "minimum": 1, "maximum": 40, "default": 1 },
+        "maxLevel":    { "type": "integer", "minimum": 1, "maximum": 40, "default": 40 },
+        "weight":      { "type": "number",  "exclusiveMinimum": 0,        "default": 1.0 },
+        "baseCount":   { "type": "integer", "minimum": 1,                  "default": 1 },
+        "countGrowth": { "type": "integer", "minimum": 0,                  "default": 0 }
+      }
+    },
+    "creatureName": {
+      "type": "string",
+      "enum": [
+        "BabyRedFox","BabyRedFox_Outside","BabySnapper","Banshee","Bear",
+        "BigSpider","BigSpider_AuwaldDungeon","BigSpider_Leuchtwald_Spot_01","BigSpider_Leuchtwald_Spot_02",
+        "Bloodquito_Auwald","Bloodquito_Kamikaze","Bloodquito_Rotmoor","Bloodquito_RotmoorEnemiesWithFrogs",
+        "Boar","Boar_Intro","Boar_Luminous","Boar_Luminous_ExpeditionML","Boar_Luminous_ExpeditionRL",
+        "BrutusEnd_BigSpider","BrutusEnd_Outro_Creatures","ChaosSpirit","DiggerPig",
+        "EliteRipper","EliteRipper_HuntTheRipper",
+        "EnemyFlesh_Baneling","EnemyFlesh_Melee","EnemyFlesh_Ranged","EnemyFlesh_Plant","EnemyFlesh_Tank",
+        "Foglet","Foglet_Weak","Foglet_WithoutFog",
+        "Frog_Friendly_Hansi","Frog_Friendly_Player","Frog_Melee","Frog_Ranged",
+        "Golem","Golem_ChallengeCave","Golem_Library",
+        "GreatTusk","Boar_Luminous_GreatTuskMinion","Boar_Luminous_GreatTuskMinion_EndPhase","Boar_Luminous_GreatTuskMinion_Intimidate","LightBear_GreatTuskMinion","ShadowRipper_GreatTuskMinion",
+        "Harpy","HungryRipper","HungryRipper_InstantAggro","Leshen",
+        "LightBear","LightBear_ExpeditionML","Menshee","MortarShroom","RedFox",
+        "Ripper","Ripper_InstantAggro",
+        "ShadowRipper","ShadowRipper_Ambush","ShadowRipper_Ambush_LittleAggroRange","ShadowRipper_Ambush_LittleAggroRange_NoReactionGrp","ShadowRipper_ExpeditionRunFollower_02","ShadowRipper_ExpeditionRunLeader",
+        "Snapper","Snapper_ExtraWeak","Snapper_ForestDungeonBoss","Snapper_SpiderBossForest_Actual","Snapper_Weak",
+        "Spitter","Spitter_ExtraWeak","Spitter_ForestDungeonBoss","Splitter_SpiderBossForest_Actual","Spitter_Weak",
+        "Sprigga","Sprigga_Yellow","Sprigga_Young_Hidden","Sprigga_Young_Normal","Sprigga_Young_Yellow_Hidden","Sprigga_Young_Yellow_Normal",
+        "Stalker_Blue","Stalker_Green","Stalker_Red",
+        "StoneFist","StoneFist_BigGroupAggro","StoneFist_DeepMine",
+        "WaterAmbusher","WaterDevil","WaterDevil_Red","WaterRat","WaterRat_Bone","WaterRat_Young","Worm",
+        "Critter_Cat_Aggressive_01","Critter_Cat_Aggressive_02","Critter_Cat_Lovely_01","Critter_Cat_Lovely_02","Critter_Cat_RunAway_01","Critter_Cat_RunAway_02",
+        "Critter_Mikesch",
+        "Critter_Dog_Type1_01","Critter_Dog_Type1_02","Critter_Dog_Type2_01","Critter_Dog_Type2_02","Critter_Dog_Type3_01","Critter_Dog_Type3_02",
+        "Critter_BlackGrouse_Female","Critter_BlackGrouse_Male","Critter_NurturingSprite",
+        "Critter_Sheep_NonDialog","Critter_Sheep_01","Critter_Sheep_02","Critter_Sheep_03","Critter_Sheep_04","Critter_Sheep_Generic_01",
+        "Brutus",
+        "Draugr_Axe",
+        "Draugr_Mage","Draugr_Mage_BrutusCave","Draugr_Mage_RedTower_Stage_03_Letter",
+        "Draugr_Spear","Draugr_Spear_BrutusCave","Draugr_Spear_BrutusCave_StartAlive","Draugr_Spear_RedTower_Letter","Draugr_Spear_RedTower_Stage_03",
+        "Draugr_Sword_Library_Letter","Draugr_Sword_Shield","Draugr_Sword_Shield_BrutusCave","Draugr_Sword_Shield_BrutusCave_StartAlive","Draugr_Sword_Shield_DraugrDungeonIntro","Draugr_Sword_Shield_RedTower_Stage_03",
+        "Critter_Rat","Critter_Snake_Adder"
+      ]
+    },
+    "banditName": {
+      "type": "string",
+      "enum": [
+        "Human_Bandit_Expedition_01","Human_Bandit_Expedition_02","Human_Bandit_Expedition_03","Human_Bandit_Expedition_04",
+        "Human_Bandit_Mine_01","Human_Bandit_Mine_02","Human_Bandit_Mine_03",
+        "Human_Bandit_RuinKasern_01","Human_Bandit_RuinKasern_02","Human_Bandit_RuinKasern_03",
+        "Human_Bandit_Ruins_01","Human_Bandit_Ruins_02","Human_Bandit_Ruins_03","Human_Bandit_Ruins_04","Human_Bandit_Ruins_05",
+        "Human_Bandit_Snaga"
+      ]
+    },
+    "regionName": {
+      "type": "string",
+      "description": "Valid Drova_Modding_API.Systems.Region values. Filename of files under regions/ must match one of these (case-sensitive, without the .json extension).",
+      "enum": [
+        "RedTower","Mine","Cave","City","SpiderDungeon","Auwald","Nemeton","EntryNemeton","Intro",
+        "Ruins","Tavern","CityDungeon","DeathMoor","Academy","Forest","Library","FriendlyMoor",
+        "Mutter","Leuchtwald","River","RootenMoor","WoodCamp","RuinsCamp","RuinUnder","Magecamp",
+        "Ruinexplorer","RuinSchmuggler","Hain","Heide","Schlund","Overworld_Or_Cave"
+      ]
+    }
+  }
+}

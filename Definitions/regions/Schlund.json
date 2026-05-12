@@ -1,0 +1,15 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "ShadowRipper",         "minLevel": 20, "maxLevel": 40, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "ShadowRipper_Ambush",  "minLevel": 25, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "Stalker_Red",          "minLevel": 25, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "EliteRipper",          "minLevel": 30, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterRat_Young",       "minLevel": 1,  "maxLevel": 10, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "Bloodquito_Auwald",    "minLevel": 1,  "maxLevel": 10, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterRat",             "minLevel": 1,  "maxLevel": 10, "weight": 0.5, "baseCount": 1, "countGrowth": 1 }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "Stalker_Red",   "minLevel": 18, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "HungryRipper",  "minLevel": 8,  "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.5,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "Foglet",          "minLevel": 8,  "maxLevel": 30, "weight": 2.0, "baseCount": 2, "countGrowth": 4 },
+    { "creature": "Foglet_Weak",     "minLevel": 1,  "maxLevel": 15, "weight": 1.5, "baseCount": 2, "countGrowth": 3 },
+    { "creature": "Banshee",         "minLevel": 18, "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "Menshee",         "minLevel": 22, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterAmbusher",   "minLevel": 22, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterDevil",      "minLevel": 20, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterDevil_Red",  "minLevel": 20, "maxLevel": 35, "weight": 0.5, "baseCount": 1, "countGrowth": 1 }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "BigSpider",  "minLevel": 8,  "maxLevel": 40, "weight": 1.5, "baseCount": 1, "countGrowth": 5 },
+    { "creature": "Worm",       "minLevel": 15, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 4 },
+    { "creature": "StoneFist",  "minLevel": 8,  "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 3 }
+  ]
+}

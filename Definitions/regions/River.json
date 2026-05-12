@@ -1,0 +1,14 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.25,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "WaterAmbusher",   "minLevel": 25, "maxLevel": 30, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "WaterDevil",      "minLevel": 20, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterDevil_Red",  "minLevel": 25, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "WaterRat",        "minLevel": 1,  "maxLevel": 12, "weight": 1.5, "baseCount": 2, "countGrowth": 2 },
+    { "creature": "Frog_Melee",      "minLevel": 10, "maxLevel": 20, "weight": 1.5, "baseCount": 2, "countGrowth": 2 },
+    { "creature": "Frog_Ranged",     "minLevel": 10, "maxLevel": 20, "weight": 1.5, "baseCount": 2, "countGrowth": 2 }
+  ]
+}

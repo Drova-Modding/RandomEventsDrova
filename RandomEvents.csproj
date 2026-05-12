@@ -457,9 +457,17 @@
 		<Compile Include="Events\**\*.cs" />
 		<Compile Include="Util\**\*.cs" />
 		<Content Include="Directory.Build.props" />
+		<None Include="Definitions\**\*" />
 	</ItemGroup>
-	
+
+	<ItemGroup>
+		<EncounterDefinitionFiles Include="Definitions\**\*.json;Definitions\**\*.md" />
+	</ItemGroup>
+
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(GamePath)/Mods&quot;" />
+		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(GamePath)\Mods&quot;" />
+		<Copy SourceFiles="@(EncounterDefinitionFiles)"
+		      DestinationFiles="@(EncounterDefinitionFiles->'$(GamePath)\Mods\RandomEvents\%(RecursiveDir)%(Filename)%(Extension)')"
+		      SkipUnchangedFiles="true" />
 	</Target>
 </Project>

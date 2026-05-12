@@ -1,0 +1,13 @@
+{
+  "$schema": "../encounter.schema.json",
+  "skipChance": 0.5,
+  "minTypesAtLow": 1,
+  "maxTypesAtHigh": 3,
+  "entries": [
+    { "creature": "EnemyFlesh_Baneling", "minLevel": 20, "maxLevel": 30, "weight": 2.0, "baseCount": 2, "countGrowth": 4 },
+    { "creature": "EnemyFlesh_Melee",    "minLevel": 20, "maxLevel": 30, "weight": 1.5, "baseCount": 2, "countGrowth": 3 },
+    { "creature": "EnemyFlesh_Plant",    "minLevel": 20, "maxLevel": 30, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "creature": "EnemyFlesh_Ranged",   "minLevel": 20, "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 1 },
+    { "creature": "EnemyFlesh_Tank",     "minLevel": 25, "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 1 }
+  ]
+}
