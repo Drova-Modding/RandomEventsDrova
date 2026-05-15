@@ -13,7 +13,7 @@ namespace RandomEvents.Encounters
         public static readonly Dictionary<Region, EncounterPool> RegionalPools = new();
 
         /// <summary>Global pools rolled by the random world-event timer regardless of region.</summary>
-        public static readonly List<EncounterPool> GlobalPools = new();
+        public static readonly List<EncounterPool> GlobalPools = [];
 
         public static void Load()
         {

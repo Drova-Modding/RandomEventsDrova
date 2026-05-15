@@ -4,9 +4,6 @@ Every value you can put into an encounter pool entry. Names are **case-sensitive
 and come straight from `Drova_Modding_API.Access.AddressableAccess` and
 `Drova_Modding_API.Systems.Region`.
 
-If a name here is missing, it means the modding API does not expose it (yet) — the
-mod can only spawn things that have an `AssetReferenceGameObject` field on
-`Creatures` or `Bandits`.
 
 ---
 
@@ -139,7 +136,11 @@ Use as `"creature": "<name>"` in an entry.
 
 ---
 
-## Bandits
+## Bandits — bugged (`bandit` field)
+
+> **Prefer `banditType` for all new pools.** The `bandit` field uses
+> `AddressableAccess.Bandits` prefabs which have known positioning limitations.
+> It is kept for backward compatibility only.
 
 Use as `"bandit": "<name>"` in an entry.
 
@@ -164,5 +165,56 @@ Use as `"bandit": "<name>"` in an entry.
 
 ---
 
+## Bandits — BanditCreator (`banditType` + `banditDifficulty` fields)
+
+The recommended approach for bandit encounters. Each bandit is built at runtime
+with role-appropriate gear, talent progression, and randomised cosmetics
+(hair, beard, scars, dirt). Use as `"banditType": "<archetype>"`.
+
+### `banditType` — weapon archetypes
+
+| Value              | Weapon loadout                              |
+|--------------------|---------------------------------------------|
+| `Random`           | Random choice from all archetypes per spawn |
+| `Dagger`           | Dagger                                      |
+| `Sword`            | Sword                                       |
+| `Axe`              | Axe                                         |
+| `SwordShield`      | Sword + Shield                              |
+| `Spear`            | Spear                                       |
+| `SpearShield`      | Spear + Shield                              |
+| `Bow`              | Bow + Quiver                                |
+| `SpearSlingshot`   | Spear + Slingshot (mixed melee / ranged)    |
+| `SwordSlingshot`   | Sword + Slingshot (mixed melee / ranged)    |
+
+### `banditDifficulty` — equipment quality tier
+
+Optional field — defaults to `Normal` when omitted.
+
+| Value    | Weapons                           | Armour                              | Talents                    |
+|----------|-----------------------------------|-------------------------------------|----------------------------|
+| `Easy`   | Coarse / improvised (T0)          | Ragged tunic / shirt                | First talent only          |
+| `Normal` | Standard bandit weapons (T1–T2)   | Bandit T1 / T2 / leather            | First two talents          |
+| `Hard`   | Quality weapons (T3–T4)           | Bandit T4 / strong leather          | All talents + bonus skills |
+
+### Example entries
+
+```jsonc
+// Easy dagger bandit for early-game zones
+{ "banditType": "Dagger", "banditDifficulty": "Easy", "minLevel": 1, "maxLevel": 10, "weight": 2.0, "baseCount": 2, "countGrowth": 2 }
+
+// Mixed archetype group scaling into mid-game
+{ "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 8, "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 }
+{ "banditType": "Bow",         "banditDifficulty": "Normal", "minLevel": 10, "maxLevel": 28, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+
+// Hard-difficulty endgame veterans
+{ "banditType": "SpearShield", "banditDifficulty": "Hard", "minLevel": 22, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 4 }
+
+// Completely random loadout — variety without specifying a type
+{ "banditType": "Random", "banditDifficulty": "Hard", "minLevel": 25, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 3 }
+```
+
+---
+
 Source of truth: `Drova_Modding_API.Access.AddressableAccess.Creatures`,
-`.Bandits`, and `Drova_Modding_API.Systems.Region` in the Drova Modding API.
+`.Bandits`, `Drova_Modding_API.Systems.Spawning.Templates.BanditCreator`,
+and `Drova_Modding_API.Systems.Region` in the Drova Modding API.

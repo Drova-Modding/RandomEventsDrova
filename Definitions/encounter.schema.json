@@ -36,8 +36,9 @@
       "type": "object",
       "additionalProperties": false,
       "oneOf": [
-        { "required": ["creature"], "not": { "required": ["bandit"] } },
-        { "required": ["bandit"],   "not": { "required": ["creature"] } }
+        { "required": ["creature"],    "not": { "required": ["bandit", "banditType"] } },
+        { "required": ["bandit"],      "not": { "required": ["creature", "banditType"] } },
+        { "required": ["banditType"],  "not": { "required": ["creature", "bandit"] } }
       ],
       "properties": {
         "creature": {
@@ -45,8 +46,16 @@
           "$ref": "#/$defs/creatureName"
         },
         "bandit": {
-          "description": "Field name on Drova_Modding_API.Access.AddressableAccess.Bandits.",
+          "description": "Field name on Drova_Modding_API.Access.AddressableAccess.Bandits (legacy — prefer banditType).",
           "$ref": "#/$defs/banditName"
+        },
+        "banditType": {
+          "description": "BanditCreator archetype. The NPC is built at runtime with randomised cosmetics and difficulty-scaled gear.",
+          "$ref": "#/$defs/banditType"
+        },
+        "banditDifficulty": {
+          "description": "Equipment quality tier for BanditCreator entries. Omit to default to Normal.",
+          "$ref": "#/$defs/banditDifficulty"
         },
         "minLevel":    { "type": "integer", "minimum": 1, "maximum": 40, "default": 1 },
         "maxLevel":    { "type": "integer", "minimum": 1, "maximum": 40, "default": 40 },
@@ -101,6 +110,27 @@
         "Human_Bandit_Ruins_01","Human_Bandit_Ruins_02","Human_Bandit_Ruins_03","Human_Bandit_Ruins_04","Human_Bandit_Ruins_05",
         "Human_Bandit_Snaga"
       ]
+    },
+    "banditType": {
+      "type": "string",
+      "description": "Weapon archetype passed to BanditCreator. Random picks a loadout each spawn.",
+      "enum": [
+        "Random",
+        "Dagger",
+        "Sword",
+        "Axe",
+        "SwordShield",
+        "Spear",
+        "SpearShield",
+        "Bow",
+        "SpearSlingshot",
+        "SwordSlingshot"
+      ]
+    },
+    "banditDifficulty": {
+      "type": "string",
+      "description": "Equipment quality tier. Easy = coarse gear, Normal = standard, Hard = quality weapons + heavy armour.",
+      "enum": ["Easy", "Normal", "Hard"]
     },
     "regionName": {
       "type": "string",

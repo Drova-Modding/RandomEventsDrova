@@ -25,12 +25,20 @@ These can fire anywhere in the world. The world-event timer picks one of these p
 
 ### Bandit Raid
 
-| Creature             | Level range | Weight | Group size |
-|----------------------|-------------|--------|------------|
-| Bandit Expedition 01 | 3 – 20      | 1.5    | 2 → 6      |
-| Bandit Expedition 02 | 6 – 25      | 1.5    | 1 → 5      |
-| Bandit Expedition 03 | 12 – 32     | 1.0    | 1 → 5      |
-| Bandit Expedition 04 | 18 – 40     | 0.8    | 1 → 5      |
+Bandits are built at runtime by **BanditCreator** with randomized cosmetics (hair,
+beard, scars, dirt) and difficulty-scaled gear. Difficulty tiers:
+`Easy` = coarse weapons / ragged armour, `Normal` = standard bandit kit, `Hard` = quality weapons + T4 armour + bonus talents.
+
+| Archetype    | Difficulty | Level range | Weight | Group size |
+|--------------|------------|-------------|--------|------------|
+| Sword        | Easy       | 1 – 12      | 2.0    | 2 → 4      |
+| Axe          | Easy       | 1 – 12      | 1.5    | 1 → 3      |
+| Spear        | Normal     | 8 – 25      | 1.5    | 1 → 4      |
+| Sword+Shield | Normal     | 8 – 25      | 1.5    | 1 → 4      |
+| Bow          | Normal     | 10 – 30     | 1.0    | 1 → 4      |
+| Spear+Shield | Hard       | 18 – 40     | 1.0    | 1 → 5      |
+| Sword+Shield | Hard       | 20 – 40     | 0.8    | 1 → 5      |
+| Random       | Hard       | 25 – 40     | 0.5    | 1 → 6      |
 
 ### Shadow Hunt
 
@@ -158,21 +166,21 @@ Triggered when the player enters the region. Each pool has a **Skip Chance** so 
 
 ### Mine *(Skip 25%)*
 
-| Creature               | Level range | Weight | Group size |
-|------------------------|-------------|--------|------------|
-| Stone Fist             | 12 – 35     | 1.0    | 1 → 3      |
-| Stone Fist (Deep Mine) | 22 – 40     | 0.7    | 1 → 2      |
-| Mine Bandit 01         | 5 – 25      | 1.5    | 2 → 5      |
-| Mine Bandit 02         | 8 – 28      | 1.2    | 1 → 3      |
-| Mine Bandit 03         | 14 – 35     | 1.0    | 1 → 3      |
+| Entry                  | Type          | Difficulty | Level range | Weight | Group size |
+|------------------------|---------------|------------|-------------|--------|------------|
+| Stone Fist             | Creature      | —          | 12 – 35     | 1.0    | 1 → 3      |
+| Stone Fist (Deep Mine) | Creature      | —          | 22 – 40     | 0.7    | 1 → 2      |
+| Dagger bandit          | BanditCreator | Easy       | 5 – 15      | 1.5    | 2 → 5      |
+| Axe bandit             | BanditCreator | Normal     | 8 – 28      | 1.2    | 1 → 3      |
+| Spear+Slingshot bandit | BanditCreator | Normal     | 14 – 35     | 1.0    | 1 → 3      |
 
-### Ruins *(Skip 25%)*
+### Ruins *(Skip 0%)*
 
-| Creature              | Level range | Weight | Group size |
-|-----------------------|-------------|--------|------------|
-| Ruin Bandit Kasern 01 | 20 – 40     | 2.0    | 2 → 5      |
-| Ruin Bandit Kasern 02 | 20 – 40     | 1.5    | 2 → 5      |
-| Ruin Bandit Kasern 03 | 20 – 40     | 1.0    | 1 → 3      |
+| Archetype    | Difficulty | Level range | Weight | Group size |
+|--------------|------------|-------------|--------|------------|
+| Sword        | Normal     | 20 – 40     | 2.0    | 2 → 5      |
+| Sword+Shield | Normal     | 20 – 40     | 1.5    | 2 → 5      |
+| Axe          | Hard       | 25 – 40     | 1.0    | 1 → 3      |
 
 ### Overworld *(Skip 25%)*
 
@@ -203,3 +211,17 @@ Fallback pool for any region without its own list.
 4. **Group size** — each picked creature spawns a group whose size grows linearly with your level, from the *low-level* count up to the *high-level* count shown in the tables above.
 
 The result is that early game encounters are small and forgiving, and late-game encounters become large multi-type ambushes.
+
+## About BanditCreator bandits
+
+Bandit pools marked **BanditCreator** do not use a fixed prefab. Each bandit is
+generated fresh at spawn time with:
+
+- A weapon and talent set based on its **archetype** (Sword, Axe, Bow, etc.)
+- Gear quality based on its **difficulty tier** (Easy / Normal / Hard)
+- Randomized cosmetics: hood or bare-headed, hair style, beard, face scars, dirt marks
+
+This means no two raid groups will look exactly the same, and difficulty tiers
+let pool authors naturally escalate bandit threat alongside player level — put
+`Easy` entries at low levels and `Hard` entries at high levels in the same pool.
+

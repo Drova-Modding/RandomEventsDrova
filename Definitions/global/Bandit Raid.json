@@ -4,9 +4,13 @@
   "minTypesAtLow": 1,
   "maxTypesAtHigh": 3,
   "entries": [
-    { "bandit": "Human_Bandit_Expedition_01", "minLevel": 3,  "maxLevel": 20, "weight": 1.5, "baseCount": 2, "countGrowth": 4 },
-    { "bandit": "Human_Bandit_Expedition_02", "minLevel": 6,  "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 4 },
-    { "bandit": "Human_Bandit_Expedition_03", "minLevel": 12, "maxLevel": 32, "weight": 1.0, "baseCount": 1, "countGrowth": 4 },
-    { "bandit": "Human_Bandit_Expedition_04", "minLevel": 18, "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 4 }
+    { "banditType": "Sword",       "banditDifficulty": "Easy",   "minLevel": 1,  "maxLevel": 12, "weight": 2.0, "baseCount": 2, "countGrowth": 2 },
+    { "banditType": "Axe",         "banditDifficulty": "Easy",   "minLevel": 1,  "maxLevel": 12, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "Spear",       "banditDifficulty": "Normal", "minLevel": 8,  "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 },
+    { "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 8,  "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 },
+    { "banditType": "Bow",         "banditDifficulty": "Normal", "minLevel": 10, "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 3 },
+    { "banditType": "SpearShield", "banditDifficulty": "Hard",   "minLevel": 18, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 4 },
+    { "banditType": "SwordShield", "banditDifficulty": "Hard",   "minLevel": 20, "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 4 },
+    { "banditType": "Random",      "banditDifficulty": "Hard",   "minLevel": 25, "maxLevel": 40, "weight": 0.5, "baseCount": 1, "countGrowth": 5 }
   ]
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using Drova_Modding_API.Access;
 using Drova_Modding_API.Systems;
+using Drova_Modding_API.Systems.Spawning.Templates;
 using MelonLoader;
 using UnityEngine.AddressableAssets;
 
@@ -109,6 +110,16 @@ namespace RandomEvents.Encounters
                 if (dto.Entries == null) return pool;
                 foreach (EntryDto e in dto.Entries)
                 {
+                    // BanditCreator entry — new path
+                    if (!string.IsNullOrEmpty(e.BanditType))
+                    {
+                        BanditEntry banditEntry = ResolveBanditEntry(e, path);
+                        if (banditEntry != null)
+                            pool.Add(banditEntry);
+                        continue;
+                    }
+
+                    // Asset-backed entry (creature or legacy AddressableAccess bandit)
                     AssetReferenceGameObject asset = Resolve(e);
                     if (asset == null)
                     {
@@ -129,6 +140,32 @@ namespace RandomEvents.Encounters
                 MelonLogger.Error($"[RandomEvents] Failed to load '{path}': {ex.Message}");
                 return null;
             }
+        }
+
+        private static BanditEntry ResolveBanditEntry(EntryDto e, string path)
+        {
+            if (!Enum.TryParse(e.BanditType, ignoreCase: true, out BanditType banditType))
+            {
+                MelonLogger.Warning($"[RandomEvents] '{path}': unknown banditType '{e.BanditType}' — skipping.");
+                return null;
+            }
+
+            BanditDifficulty difficulty = BanditDifficulty.Normal;
+            if (!string.IsNullOrEmpty(e.BanditDifficulty) &&
+                !Enum.TryParse(e.BanditDifficulty, ignoreCase: true, out difficulty))
+            {
+                MelonLogger.Warning($"[RandomEvents] '{path}': unknown banditDifficulty '{e.BanditDifficulty}' — defaulting to Normal.");
+                difficulty = BanditDifficulty.Normal;
+            }
+
+            return new BanditEntry(
+                banditType,
+                difficulty,
+                minLevel: e.MinLevel ?? 1,
+                maxLevel: e.MaxLevel ?? 40,
+                weight: e.Weight ?? 1f,
+                baseCount: e.BaseCount ?? 1,
+                countGrowth: e.CountGrowth ?? 0);
         }
 
         private static AssetReferenceGameObject Resolve(EntryDto e)
@@ -159,6 +196,17 @@ namespace RandomEvents.Encounters
         {
             public string Creature { get; set; }
             public string Bandit { get; set; }
+            /// <summary>
+            /// BanditCreator archetype name. One of: Random, Dagger, Sword, Axe, SwordShield,
+            /// Spear, SpearShield, Bow, SpearSlingshot, SwordSlingshot.
+            /// Mutually exclusive with <c>creature</c> and <c>bandit</c>.
+            /// </summary>
+            public string BanditType { get; set; }
+            /// <summary>
+            /// Equipment quality tier for BanditCreator entries. One of: Easy, Normal, Hard.
+            /// Defaults to Normal when omitted.
+            /// </summary>
+            public string BanditDifficulty { get; set; }
             public int? MinLevel { get; set; }
             public int? MaxLevel { get; set; }
             public float? Weight { get; set; }

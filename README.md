@@ -46,8 +46,13 @@ A pool file looks like this:
   "minTypesAtLow": 1,
   "maxTypesAtHigh": 3,
   "entries": [
-    { "creature": "Boar",                 "minLevel": 1,  "maxLevel": 20, "weight": 2.0, "baseCount": 1, "countGrowth": 2 },
-    { "bandit":   "Human_Bandit_Mine_01", "minLevel": 5,  "maxLevel": 25, "weight": 1.5, "baseCount": 2, "countGrowth": 3 }
+    // Asset-backed creature — always supported
+    { "creature": "Boar", "minLevel": 1, "maxLevel": 20, "weight": 2.0, "baseCount": 1, "countGrowth": 2 },
+
+    // BanditCreator bandit — recommended for all bandit entries
+    // banditType:       archetype (Dagger | Sword | Axe | SwordShield | Spear | SpearShield | Bow | SpearSlingshot | SwordSlingshot | Random)
+    // banditDifficulty: gear tier  (Easy | Normal | Hard)  — defaults to Normal
+    { "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 8, "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 }
   ]
 }
 ```
@@ -57,7 +62,7 @@ Key references:
 | Need                                                   | File                                                                  |
 | ------------------------------------------------------ | --------------------------------------------------------------------- |
 | How the JSON works, file layout, schema fields         | [Definitions/README.md](Definitions/README.md)                        |
-| Every valid `creature` / `bandit` / region name        | [Definitions/SPAWNABLES.md](Definitions/SPAWNABLES.md)                |
+| Every valid `creature` / `banditType` / region name    | [Definitions/SPAWNABLES.md](Definitions/SPAWNABLES.md)                |
 | JSON Schema (autocomplete + validation in your editor) | [Definitions/encounter.schema.json](Definitions/encounter.schema.json) |
 
 The mod ships with the contents of [`Definitions/`](Definitions/README.md) as the source-of-truth content; on build, those files are copied to `<game>/Mods/RandomEvents/`. Reload the game after editing.
@@ -86,8 +91,9 @@ Load-order notes:
 Core.cs                              MelonMod entry point — loads pools on scene load
 Encounters/EncounterDefinitions.cs   In-memory pool store + Load() entry point
 Encounters/EncounterLoader.cs        Reads regions/*.json + global/*.json next to the dll
-Encounters/EncounterPool.cs          Weighted, level-gated pool builder
-Encounters/CreatureEntry.cs          A single weighted entry (asset + level range + scaling)
+Encounters/EncounterPool.cs          Weighted, level-gated pool builder (asset + bandit entries)
+Encounters/CreatureEntry.cs          Asset-backed entry (creature or legacy bandit prefab)
+Encounters/BanditEntry.cs            BanditCreator entry — type + difficulty + Spawn() factory
 Events/ScaledEncounterEvent.cs       Global event — re-rolls the spawn list each trigger
 Events/ScaledRegionalEvent.cs        Regional event — re-rolls on region entry
 Util/PlayerLevelHelper.cs            Reads current player level for scaling
