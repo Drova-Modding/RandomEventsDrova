@@ -1,4 +1,5 @@
 using Drova_Modding_API.GlobalFields;
+using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
 using RandomEvents.Encounters;
@@ -23,8 +24,9 @@ namespace RandomEvents
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
             if (sceneName != SceneNames.GameplayMain) return;
+            NpcCreator.Prewarm();
             if (_registered) return;
-
+            
             EncounterDefinitions.Load();
 
             // Global random events — fired by the API's cooldown timer.
