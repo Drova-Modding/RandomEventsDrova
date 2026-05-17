@@ -1,34 +1,31 @@
 using System.Collections;
 using Drova_Modding_API.Access;
-using Drova_Modding_API.Extensions;
 using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using Drova_Modding_API.Systems.WorldEvents.Regional;
-using Il2CppDrova;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace RandomEvents.Events
 {
     /// <summary>
     /// Regional ambush. When the player enters the region, after a short delay, a level-scaled
     /// encounter from the pool is spawned around them. After the player leaves, spawned creatures
-    /// stick around for a grace period (so a quick re-entry keeps them) and a re-entry cooldown
+    /// stick around for a grace period (so a quick re-entry keeps them), and a re-entry cooldown
     /// prevents respawning by walking in and out.
     /// </summary>
     public class ScaledRegionalEvent : ARegionalEvent
     {
         private readonly EncounterPool _pool;
-        private readonly float _enterDelaySeconds;
-        private readonly float _selfEndSeconds;
         private readonly float _reEntryCooldownSeconds;
-        private readonly float _despawnGraceSeconds;
         private readonly bool _runParallel;
         private readonly float _skipChance;
+        private readonly WaitForSeconds _enterDelayWait;
+        private readonly WaitForSeconds _selfEndWait;
+        private readonly WaitForSeconds _despawnGraceWait;
 
         private readonly ActorWorldLocator _locator = new();
         private readonly List<GameObject> _spawned = new();
@@ -48,13 +45,13 @@ namespace RandomEvents.Events
             : base(region)
         {
             _pool = pool;
-            _enterDelaySeconds = enterDelaySeconds;
-            _selfEndSeconds = selfEndSeconds;
             _reEntryCooldownSeconds = reEntryCooldownSeconds;
-            _despawnGraceSeconds = despawnGraceSeconds;
             _runParallel = runParallel;
             _skipChance = pool.SkipChance;
-            _locator.SetMinMaxRange(new Vector2(260f, 450f));
+            _enterDelayWait = new WaitForSeconds(enterDelaySeconds);
+            _selfEndWait = new WaitForSeconds(selfEndSeconds);
+            _despawnGraceWait = new WaitForSeconds(despawnGraceSeconds);
+            _locator.SetMinMaxRange(new Vector2(260f, 420f));
         }
 
         public override bool CanRunParallel() => _runParallel;
@@ -130,7 +127,7 @@ namespace RandomEvents.Events
 
         private IEnumerator SpawnAfterDelay()
         {
-            yield return new WaitForSeconds(_enterDelaySeconds);
+            yield return _enterDelayWait;
             if (!IsRunning) yield break;
 
             int level = PlayerLevelHelper.GetPlayerLevel();
@@ -141,8 +138,8 @@ namespace RandomEvents.Events
                 yield break;
             }
 
-            if (!PlayerAccess.TryGetPlayer(out Actor player)) yield break;
-            Vector3 origin = player.transform.position;
+            if (!PlayerAccess.TryGetPlayer(out var player)) yield break;
+            var origin = player.transform.position;
 
             // Anchor the encounter at one locator-picked spot; cluster the rest around it
             // so a group spawns together instead of scattering (and avoids the framework's
@@ -167,10 +164,6 @@ namespace RandomEvents.Events
                     var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
                     if (go != null)
                     {
-                        if (BanditGuids.IsBandit(pair.Key)){
-                            MelonLogger.Msg($"[RandomEvents] Modifying bandit position for '{go.name}' at {spot}.");
-                            //BanditSpawningHelper.ModifyBanditPosition(go, spot);
-                        }
                         _spawned.Add(go);
                     }
                 }
@@ -178,11 +171,12 @@ namespace RandomEvents.Events
 
             // Spawn BanditCreator bandits (new path — no addressable required).
             var banditEntries = _pool.BuildBanditEntries(level);
-            foreach (var (entry, count) in banditEntries)
+            for (int index = 0; index < banditEntries.Count; index++)
             {
+                (var entry, int count) = banditEntries[index];
                 for (int i = 0; i < count; i++)
                 {
-                    Vector2 spot = _spawned.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
+                    var spot = _spawned.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
                     var go = entry.Spawn("Bandit", spot);
                     if (go != null) _spawned.Add(go);
                 }
@@ -201,13 +195,13 @@ namespace RandomEvents.Events
 
         private IEnumerator SafetyEnd()
         {
-            yield return new WaitForSeconds(_selfEndSeconds);
+            yield return _selfEndWait;
             EndEvent();
         }
 
         private IEnumerator DelayedDespawn()
         {
-            yield return new WaitForSeconds(_despawnGraceSeconds);
+            yield return _despawnGraceWait;
             DespawnAll();
             _despawnToken = null;
         }

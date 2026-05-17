@@ -12,7 +12,7 @@
       "minimum": 0,
       "maximum": 1,
       "default": 0.25,
-      "description": "Chance the pool is skipped entirely when triggered (0.0 = always run, 1.0 = never run)."
+      "description": "Chance the pool is skipped entirely when triggered (0.0 = always run, 1.0 = never run). Only applies to region pools, not global pools."
     },
     "minTypesAtLow": {
       "type": "integer",

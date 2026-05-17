@@ -25,12 +25,13 @@ namespace RandomEvents.Events
             : base(new Dictionary<AssetReferenceGameObject, int>(), selfEndInSecond)
         {
             _pool = pool;
-            WorldLocator.SetMinMaxRange(new Vector2(260f, 450f));
-            _banditLocator.SetMinMaxRange(new Vector2(260f, 450f));
+            WorldLocator.SetMinMaxRange(new Vector2(260f, 420f));
+            _banditLocator.SetMinMaxRange(new Vector2(260f, 420f));
         }
 
         public override void StartEvent()
         {
+
             int level = PlayerLevelHelper.GetPlayerLevel();
 
             var fresh = _pool.Build(level);
@@ -54,18 +55,22 @@ namespace RandomEvents.Events
             {
                 SpawnBanditCreatorEntries(banditEntries);
             }
-
+            #if DEBUG
             MelonLogger.Msg($"[RandomEvents] Starting event from pool '{_pool.Name}' — {fresh.Count} asset type(s), {banditEntries.Count} bandit type(s).");
+            #endif
             base.StartEvent();
         }
 
         private void SpawnBanditCreatorEntries(List<(BanditEntry Entry, int Count)> banditEntries)
         {
-            // Find an anchor position using the dedicated locator.
+            // Find an anchor position relative to the player using the dedicated locator.
+            if (!Drova_Modding_API.Access.PlayerAccess.TryGetPlayer(out var player)) return;
+            Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.y);
+
             Vector2? anchor = null;
             for (int attempt = 0; attempt < 8 && anchor == null; attempt++)
             {
-                var pick = _banditLocator.GetRandomFreePosition(Vector2.zero);
+                var pick = _banditLocator.GetRandomFreePosition(playerPos);
                 if (pick.HasValue && pick.Value != Vector2.zero) anchor = pick.Value;
             }
 
@@ -83,8 +88,10 @@ namespace RandomEvents.Events
                     Vector2 spot = first ? anchor.Value : ClusterAround(anchor.Value);
                     first = false;
                     var go = entry.Spawn("Bandit", spot);
+                    #if DEBUG
                     if (go != null)
                         MelonLogger.Msg($"[RandomEvents] Spawned BanditCreator bandit '{go.name}' at {spot}.");
+                    #endif
                 }
             }
         }
@@ -94,27 +101,19 @@ namespace RandomEvents.Events
             base.OnEncounterSpawned(spawnedObject, assetReference, position);
             if (spawnedObject == null) return;
 
-            // First valid framework pick becomes the group anchor; the rest snap into a
+            // The first valid framework pick becomes the group anchor; the rest snap into a
             // 5–30 unit ring around it. Also catches the framework's (0,0) fallback when
             // its locator fails on later picks.
-            Vector2 finalPos;
             if (!_anchor.HasValue)
             {
                 if (position == Vector2.zero) return;
                 _anchor = position;
-                finalPos = position;
             }
             else
             {
-                finalPos = ClusterAround(_anchor.Value);
+                var finalPos = ClusterAround(_anchor.Value);
                 var t = spawnedObject.transform;
                 t.position = new Vector3(finalPos.x, finalPos.y, t.position.z);
-            }
-
-            if (BanditGuids.IsBandit(assetReference))
-            {
-                MelonLogger.Msg($"[RandomEvents] Modifying bandit position for '{spawnedObject.name}' at {finalPos}.");
-                //BanditSpawningHelper.ModifyBanditPosition(spawnedObject, finalPos);
             }
         }
 

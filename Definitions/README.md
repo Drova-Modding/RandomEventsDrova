@@ -44,7 +44,7 @@ creature/bandit names from the enum, and flag typos in field names.
 {
   "$schema": "../encounter.schema.json",
 
-  // Chance the pool is skipped entirely when triggered (0.0–1.0). Default 0.25.
+  // Chance the pool is skipped entirely when triggered (0.0–1.0). Default 0.25. Only has effect on region pools.
   "skipChance": 0.25,
 
   // Distinct types picked per spawn at player level 1.
@@ -116,7 +116,7 @@ Each entry must use **exactly one** of the three spawn strategies:
 | `Normal` (default) | Standard bandit weapons and T1/T2 armour                    |
 | `Hard`             | Quality weapons, T4 armour, heavier shields + bonus talents |
 
-Bandits spawn with randomised hair, beard, scars, and dirt layers regardless of difficulty.
+Bandits spawn with randomized hair, beard, scars, and dirt layers regardless of difficulty.
 Difficulty also scales which talents the bandit has unlocked.
 
 ## What can I spawn? Which regions exist?

@@ -1,6 +1,6 @@
 {
   "$schema": "../encounter.schema.json",
-  "skipChance": 0.25,
+  "skipChance": 0,
   "minTypesAtLow": 1,
   "maxTypesAtHigh": 3,
   "entries": [

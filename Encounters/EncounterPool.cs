@@ -71,10 +71,8 @@ namespace RandomEvents.Encounters
                 eligible.Remove(pick);
                 int count = pick.ScaledCount(playerLevel);
                 if (count <= 0) count = 1;
-                if (result.ContainsKey(pick.Asset))
+                if (!result.TryAdd(pick.Asset, count))
                     result[pick.Asset] += count;
-                else
-                    result[pick.Asset] = count;
             }
             return result;
         }
