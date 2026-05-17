@@ -470,4 +470,26 @@
 		      DestinationFiles="@(EncounterDefinitionFiles->'$(GamePath)\Mods\RandomEvents\%(RecursiveDir)%(Filename)%(Extension)')"
 		      SkipUnchangedFiles="true" />
 	</Target>
+
+	<Target Name="PackageMod" AfterTargets="PostBuild">
+		<PropertyGroup>
+			<DistDir>$(MSBuildProjectDirectory)\dist</DistDir>
+			<StagingDir>$(DistDir)\staging\$(Configuration)</StagingDir>
+			<ZipName Condition="'$(Configuration)'=='Debug'">RandomEvents_Dev.zip</ZipName>
+			<ZipName Condition="'$(Configuration)'=='Release'">RandomEvents.zip</ZipName>
+			<ZipPath>$(DistDir)\$(ZipName)</ZipPath>
+		</PropertyGroup>
+
+		<RemoveDir Directories="$(StagingDir)" />
+		<MakeDir Directories="$(DistDir);$(StagingDir)\Mods;$(StagingDir)\Mods\RandomEvents" />
+
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(StagingDir)\Mods" />
+		<Copy SourceFiles="@(EncounterDefinitionFiles)"
+		      DestinationFiles="@(EncounterDefinitionFiles->'$(StagingDir)\Mods\RandomEvents\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+		<Delete Files="$(ZipPath)" />
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Compress-Archive -Path '$(StagingDir)\*' -DestinationPath '$(ZipPath)' -Force&quot;" />
+
+		<Message Importance="high" Text="Packaged $(Configuration) build -&gt; $(ZipPath)" />
+	</Target>
 </Project>
