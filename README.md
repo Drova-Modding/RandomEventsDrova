@@ -59,10 +59,10 @@ A pool file looks like this:
 
 Key references:
 
-| Need                                                   | File                                                                  |
-| ------------------------------------------------------ | --------------------------------------------------------------------- |
-| How the JSON works, file layout, schema fields         | [Definitions/README.md](Definitions/README.md)                        |
-| Every valid `creature` / `banditType` / region name    | [Definitions/SPAWNABLES.md](Definitions/SPAWNABLES.md)                |
+| Need                                                   | File                                                                   |
+|--------------------------------------------------------|------------------------------------------------------------------------|
+| How the JSON works, file layout, schema fields         | [Definitions/README.md](Definitions/README.md)                         |
+| Every valid `creature` / `banditType` / region name    | [Definitions/SPAWNABLES.md](Definitions/SPAWNABLES.md)                 |
 | JSON Schema (autocomplete + validation in your editor) | [Definitions/encounter.schema.json](Definitions/encounter.schema.json) |
 
 The mod ships with the contents of [`Definitions/`](Definitions/README.md) as the source-of-truth content; on build, those files are copied to `<game>/Mods/RandomEvents/`. Reload the game after editing.
@@ -113,3 +113,6 @@ Requirements:
 ## License
 
 See [LICENSE](LICENSE).
+
+## Changelog 
+See [CHANGELOG.md](CHANGELOG.md).

@@ -1,5 +1,4 @@
 using Drova_Modding_API.Systems.Spawning;
-using System.Collections.Generic;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
 using RandomEvents.Encounters;
@@ -20,6 +19,7 @@ namespace RandomEvents.Events
         private readonly EncounterPool _pool;
         private Vector2? _anchor;
         private readonly ActorWorldLocator _banditLocator = new();
+        private readonly SpawnTracker _banditTracker = new();
 
         public ScaledEncounterEvent(EncounterPool pool, int selfEndInSecond = 180)
             : base(new Dictionary<AssetReferenceGameObject, int>(), selfEndInSecond)
@@ -61,6 +61,12 @@ namespace RandomEvents.Events
             base.StartEvent();
         }
 
+        public override void EndEvent()
+        {
+            _banditTracker.DespawnAll();
+            base.EndEvent();
+        }
+
         private void SpawnBanditCreatorEntries(List<(BanditEntry Entry, int Count)> banditEntries)
         {
             // Find an anchor position relative to the player using the dedicated locator.
@@ -87,10 +93,10 @@ namespace RandomEvents.Events
                 {
                     Vector2 spot = first ? anchor.Value : ClusterAround(anchor.Value);
                     first = false;
-                    var go = entry.Spawn("Bandit", spot);
+                    var lazyActor = entry.Spawn("Bandit", spot);
+                    _banditTracker.Add(lazyActor);
                     #if DEBUG
-                    if (go != null)
-                        MelonLogger.Msg($"[RandomEvents] Spawned BanditCreator bandit '{go.name}' at {spot}.");
+                    MelonLogger.Msg($"[Queued lazy BanditCreator bandit '{lazyActor.GUID}' at {spot}.");
                     #endif
                 }
             }
