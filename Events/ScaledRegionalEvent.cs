@@ -4,6 +4,7 @@ using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using Drova_Modding_API.Systems.WorldEvents.Regional;
+using Il2CppDrova.Utilities.LazyLoading;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
@@ -28,7 +29,7 @@ namespace RandomEvents.Events
 		private readonly WaitForSeconds _despawnGraceWait;
 
 		private readonly ActorWorldLocator _locator = new();
-		private readonly List<GameObject> _spawned = new();
+		private readonly SpawnTracker _tracker = new();
 		private object _delayToken;
 		private object _safetyToken;
 		private object _despawnToken;
@@ -76,8 +77,7 @@ namespace RandomEvents.Events
 			base.StartEvent();
 
 			// Player came back while previous creatures are still alive (despawn was pending).
-			// Keep them, refresh safety, don't respawn.
-			if (HasLiveSpawned())
+			if (_tracker.HasLive())
 			{
 				if (_despawnToken != null)
 				{
@@ -132,9 +132,9 @@ namespace RandomEvents.Events
 				_safetyToken = null;
 			}
 
-			// Hand-spawned creatures off to delayed-despawn instead of killing immediately,
+			// Hand spawned entities off to delayed-despawn instead of killing immediately,
 			// so a quick re-entry can keep them alive.
-			if (HasLiveSpawned() && _despawnToken == null)
+			if (_tracker.HasLive() && _despawnToken == null)
 			{
 				_despawnToken = MelonCoroutines.Start(DelayedDespawn());
 			}
@@ -161,9 +161,6 @@ namespace RandomEvents.Events
 			if (!PlayerAccess.TryGetPlayer(out var player)) yield break;
 			var origin = player.transform.position;
 
-			// Anchor the encounter at one locator-picked spot; cluster the rest around it
-			// so a group spawns together instead of scattering (and avoids the framework's
-			// (0,0) fallback when it can't place later picks).
 			Vector2? anchor = null;
 			for (int attempt = 0; attempt < 8 && anchor == null; attempt++)
 			{
@@ -182,30 +179,26 @@ namespace RandomEvents.Events
 			{
 				for (int i = 0; i < pair.Value; i++)
 				{
-					Vector2 spot = _spawned.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
+					Vector2 spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
 					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
-					if (go != null)
-					{
-						_spawned.Add(go);
-					}
+					_tracker.Add(go);
 				}
 			}
 
-			// Spawn BanditCreator bandits (new path — no addressable required).
+			// Spawn BanditCreator bandits as lazy actors (do not force immediate load).
 			var banditEntries = _pool.BuildBanditEntries(level);
 			for (int index = 0; index < banditEntries.Count; index++)
 			{
 				(var entry, int count) = banditEntries[index];
 				for (int i = 0; i < count; i++)
 				{
-					var spot = _spawned.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
-					var go = entry.Spawn("Bandit", spot);
-					if (go != null) _spawned.Add(go);
+					var spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
+					_tracker.Add(entry.Spawn("Bandit", spot));
 				}
 			}
 
             #if DEBUG
-			MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' spawned {_spawned.Count} creatures at level {level}.");
+			MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' queued {_tracker.Count} entities at level {level}.");
             #endif
 
 			_safetyToken = MelonCoroutines.Start(SafetyEnd());
@@ -227,26 +220,9 @@ namespace RandomEvents.Events
 		private IEnumerator DelayedDespawn()
 		{
 			yield return _despawnGraceWait;
-			DespawnAll();
+			MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' despawning {_tracker.Count} entities after grace period.");
+			_tracker.DespawnAll();
 			_despawnToken = null;
-		}
-
-		private bool HasLiveSpawned()
-		{
-			for (int i = _spawned.Count - 1; i >= 0; i--)
-			{
-				if (_spawned[i] == null) _spawned.RemoveAt(i);
-			}
-			return _spawned.Count > 0;
-		}
-
-		private void DespawnAll()
-		{
-			for (int i = 0; i < _spawned.Count; i++)
-			{
-				if (_spawned[i] != null) UnityEngine.Object.Destroy(_spawned[i]);
-			}
-			_spawned.Clear();
 		}
 	}
 }

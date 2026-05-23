@@ -1,4 +1,5 @@
 using Drova_Modding_API.Systems.Spawning.Templates;
+using Il2CppDrova.Utilities.LazyLoading;
 using UnityEngine;
 
 namespace RandomEvents.Encounters
@@ -25,7 +26,7 @@ namespace RandomEvents.Encounters
     /// <summary>
     /// One <see cref="BanditCreator"/>-backed spawn entry inside an encounter pool.
     /// Unlike <see cref="CreatureEntry"/> this does not need an addressable asset —
-    /// the NPC is constructed at runtime with randomised cosmetics and difficulty-scaled gear.
+    /// the NPC is constructed at runtime with randomized cosmetics and difficulty-scaled gear.
     /// </summary>
     public class BanditEntry
     {
@@ -77,31 +78,30 @@ namespace RandomEvents.Encounters
             if (CountGrowth <= 0 || MaxLevel == MinLevel) return BaseCount;
             int clamped = level < MinLevel ? MinLevel : (level > MaxLevel ? MaxLevel : level);
             float t = (clamped - MinLevel) / (float)(MaxLevel - MinLevel);
-            return BaseCount + (int)System.Math.Round(CountGrowth * t);
+            return BaseCount + (int)Math.Round(CountGrowth * t);
         }
 
         /// <summary>
-        /// Spawns a single bandit NPC at <paramref name="position"/> and returns its
-        /// <see cref="GameObject"/>. The bandit is automatically hostile to the player.
+        /// Creates a single lazy bandit actor at <paramref name="position"/>.
+        /// The engine decides when to load it based on player/chunk proximity.
         /// </summary>
         /// <param name="name">Display name shown in the HUD.</param>
         /// <param name="position">World-space spawn position.</param>
-        public GameObject Spawn(string name, Vector2 position)
+        public LazyActor Spawn(string name, Vector2 position)
         {
             return Type switch
             {
-                BanditType.Dagger         => BanditCreator.CreateDaggerBandit(name, position, Difficulty),
-                BanditType.Sword          => BanditCreator.CreateSwordBandit(name, position, Difficulty),
-                BanditType.Axe            => BanditCreator.CreateAxeBandit(name, position, Difficulty),
-                BanditType.SwordShield    => BanditCreator.CreateSwordShieldBandit(name, position, Difficulty),
-                BanditType.Spear          => BanditCreator.CreateSpearBandit(name, position, Difficulty),
-                BanditType.SpearShield    => BanditCreator.CreateSpearShieldBandit(name, position, Difficulty),
-                BanditType.Bow            => BanditCreator.CreateBowBandit(name, position, Difficulty),
-                BanditType.SpearSlingshot => BanditCreator.CreateSpearSlingshotBandit(name, position, Difficulty),
-                BanditType.SwordSlingshot => BanditCreator.CreateSwordSlingshotBandit(name, position, Difficulty),
-                _                         => BanditCreator.CreateRandomBandit(name, position, Difficulty)
+                BanditType.Dagger         => BanditCreator.CreateDaggerBanditLazy(name, position, Difficulty),
+                BanditType.Sword          => BanditCreator.CreateSwordBanditLazy(name, position, Difficulty),
+                BanditType.Axe            => BanditCreator.CreateAxeBanditLazy(name, position, Difficulty),
+                BanditType.SwordShield    => BanditCreator.CreateSwordShieldBanditLazy(name, position, Difficulty),
+                BanditType.Spear          => BanditCreator.CreateSpearBanditLazy(name, position, Difficulty),
+                BanditType.SpearShield    => BanditCreator.CreateSpearShieldBanditLazy(name, position, Difficulty),
+                BanditType.Bow            => BanditCreator.CreateBowBanditLazy(name, position, Difficulty),
+                BanditType.SpearSlingshot => BanditCreator.CreateSpearSlingshotBanditLazy(name, position, Difficulty),
+                BanditType.SwordSlingshot => BanditCreator.CreateSwordSlingshotBanditLazy(name, position, Difficulty),
+                _                         => BanditCreator.CreateRandomBanditLazy(name, position, Difficulty)
             };
         }
     }
 }
-
