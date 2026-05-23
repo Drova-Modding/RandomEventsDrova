@@ -5,7 +5,7 @@ using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Events;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.0.0", "TrustNoOneElse", null)]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.0", "TrustNoOneElse", null)]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 
