@@ -441,7 +441,7 @@
 			<HintPath>$(GamePath)/MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
 		</Reference>
 		<Reference Include="DrovaModdingAPI">
-			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Drova - Forsaken Kin\Mods\Drova_Modding_API.dll</HintPath>
+			<HintPath>$(GamePath)\Mods\Drova_Modding_API.dll</HintPath>
 		</Reference>
 
 	</ItemGroup>
