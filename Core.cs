@@ -1,11 +1,10 @@
 using Drova_Modding_API.GlobalFields;
-using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Events;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.0", "TrustNoOneElse", null)]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.1", "TrustNoOneElse", null)]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 
@@ -24,7 +23,6 @@ namespace RandomEvents
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
             if (sceneName != SceneNames.GameplayMain) return;
-            NpcCreator.Prewarm();
             if (_registered) return;
             
             EncounterDefinitions.Load();
