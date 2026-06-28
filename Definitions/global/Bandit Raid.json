@@ -4,8 +4,8 @@
   "minTypesAtLow": 1,
   "maxTypesAtHigh": 3,
   "entries": [
-    { "banditType": "Sword",       "banditDifficulty": "Easy",   "minLevel": 1,  "maxLevel": 12, "weight": 2.0, "baseCount": 2, "countGrowth": 2 },
-    { "banditType": "Axe",         "banditDifficulty": "Easy",   "minLevel": 1,  "maxLevel": 12, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "Sword",       "banditDifficulty": "Easy",   "minLevel": 3,  "maxLevel": 12, "weight": 2.0, "baseCount": 2, "countGrowth": 2 },
+    { "banditType": "Axe",         "banditDifficulty": "Easy",   "minLevel": 3,  "maxLevel": 12, "weight": 1.5, "baseCount": 1, "countGrowth": 2 },
     { "banditType": "Spear",       "banditDifficulty": "Normal", "minLevel": 8,  "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 },
     { "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 8,  "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 },
     { "banditType": "Bow",         "banditDifficulty": "Normal", "minLevel": 10, "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 3 },

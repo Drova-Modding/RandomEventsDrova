@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.2 – Bugfix release
+- Fixed Intro Region could spawn events.
+
 ## 1.1.1 – Modding API Compatibility
 
 - Updated to be compatible with the latest Drova Modding API (v0.5.0).

@@ -1,10 +1,12 @@
 using Drova_Modding_API.GlobalFields;
+using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Events;
+using System.Collections;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.1", "TrustNoOneElse", null)]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.2", "TrustNoOneElse", null)]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 
@@ -23,6 +25,7 @@ namespace RandomEvents
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
             if (sceneName != SceneNames.GameplayMain) return;
+            MelonCoroutines.Start(DelayBlockIntroRegion());
             if (_registered) return;
             
             EncounterDefinitions.Load();
@@ -43,6 +46,14 @@ namespace RandomEvents
 
             _registered = true;
             LoggerInstance.Msg($"Registered {EncounterDefinitions.GlobalPools.Count} global pools and {EncounterDefinitions.RegionalPools.Count} regional pools.");
+        }
+
+        private static IEnumerator DelayBlockIntroRegion()
+        {
+            while (WorldEventSystemManager.Instance == null)
+                yield return null;
+
+            WorldEventSystemManager.Instance.AddBlockedRegion(Region.Intro);
         }
     }
 }
