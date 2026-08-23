@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.3 – Cave & boss area toggles
+
+- Events no longer fire in caves and dungeons, or in the regions that stage a boss fight.
+- Two switches in the options menu (Modding tab) turn each block off again. Both defaults are true.
+
 ## 1.1.2 – Bugfix release
 - Fixed Intro Region could spawn events.
 
