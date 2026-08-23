@@ -1,10 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using Drova_Modding_API.Access;
+using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using Drova_Modding_API.Systems.WorldEvents.Regional;
-using Il2CppDrova.Utilities.LazyLoading;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
@@ -74,6 +74,14 @@ namespace RandomEvents.Events
 
 		public override void StartEvent()
 		{
+			// Only the machine that owns the shared world spawns anything. Two players each rolling their
+			// own regional encounter produces two unrelated camps, each visible to one of them.
+			if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
+			{
+				EndEvent();
+				return;
+			}
+
 			base.StartEvent();
 
 			// Player came back while previous creatures are still alive (despawn was pending).
@@ -119,6 +127,39 @@ namespace RandomEvents.Events
 			_delayToken = MelonCoroutines.Start(SpawnAfterDelay());
 		}
 
+		/// <summary>
+		/// Ends this event and takes its creatures away now, because the world stopped being ours.
+		///
+		/// **The grace period the ordinary ending uses is exactly wrong here.** That exists so a player who
+		/// steps out of a region and straight back in keeps the fight they were in. Joining somebody else's
+		/// world is not stepping out: these creatures were rolled here, the host has never heard of them,
+		/// and every second they are left standing is a second this player spends fighting something nobody
+		/// else can see. There is no re-entry that would want them back.
+		/// </summary>
+		public void AbandonForCoop()
+		{
+			if (_delayToken != null)
+			{
+				MelonCoroutines.Stop(_delayToken);
+				_delayToken = null;
+			}
+			if (_safetyToken != null)
+			{
+				MelonCoroutines.Stop(_safetyToken);
+				_safetyToken = null;
+			}
+			if (_despawnToken != null)
+			{
+				MelonCoroutines.Stop(_despawnToken);
+				_despawnToken = null;
+			}
+
+			_tracker.DespawnAll();
+			_lastEndedAtRealtime = Time.realtimeSinceStartup;
+
+			base.EndEvent();
+		}
+
 		public override void EndEvent()
 		{
 			if (_delayToken != null)
@@ -148,7 +189,9 @@ namespace RandomEvents.Events
 			yield return _enterDelayWait;
 			if (!IsRunning) yield break;
 
-			int level = PlayerLevelHelper.GetPlayerLevel();
+			// A failed read is "not yet", not "level 1". See PlayerLevelHelper.
+			if (!PlayerLevelHelper.TryGetPlayerLevel(out int level)) yield break;
+
 			var table = _pool.Build(level);
 			if (table.Count == 0)
 			{
@@ -181,6 +224,13 @@ namespace RandomEvents.Events
 				{
 					Vector2 spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
 					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
+
+					// Announced with the asset behind it, so a shared session can build the same creature
+					// on the other machine. Without this it exists only here.
+					if (go != null)
+					{
+						ActorSpawnAccess.RecordSpawn(go.GetComponent<Il2CppDrova.Actor>(), pair.Key.AssetGUID);
+					}
 					_tracker.Add(go);
 				}
 			}

@@ -1,3 +1,5 @@
+﻿using Drova_Modding_API.Access;
+using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
@@ -31,8 +33,23 @@ namespace RandomEvents.Events
 
         public override void StartEvent()
         {
+            // Only the machine that owns the shared world rolls an encounter. Without this, two players
+            // each roll their own: different creatures, in different places, each visible to one of them,
+            // and both take the loot. Declared once in Core, checked here.
+            if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
+            {
+                WorldEventSystemManager.Instance?.EndEvent();
+                return;
+            }
 
-            int level = PlayerLevelHelper.GetPlayerLevel();
+            // Not "the player is level 1" - the stats are unreadable for a frame or two after a world
+            // load, and building from that would silently produce the weakest encounter in the pool.
+            if (!PlayerLevelHelper.TryGetPlayerLevel(out int level))
+            {
+                MelonLogger.Warning("[RandomEvents] The player's level is not readable yet — skipping this event.");
+                WorldEventSystemManager.Instance?.EndEvent();
+                return;
+            }
 
             var fresh = _pool.Build(level);
             var banditEntries = _pool.BuildBanditEntries(level);
@@ -70,7 +87,7 @@ namespace RandomEvents.Events
         private void SpawnBanditCreatorEntries(List<(BanditEntry Entry, int Count)> banditEntries)
         {
             // Find an anchor position relative to the player using the dedicated locator.
-            if (!Drova_Modding_API.Access.PlayerAccess.TryGetPlayer(out var player)) return;
+            if (!PlayerAccess.TryGetPlayer(out var player)) return;
             Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.y);
 
             Vector2? anchor = null;
