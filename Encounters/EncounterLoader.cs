@@ -35,7 +35,7 @@ namespace RandomEvents.Encounters
             AllowTrailingCommas = true
         };
 
-        public static void Load(Dictionary<Region, EncounterPool> regionalPools, List<EncounterPool> globalPools)
+        public static void Load(Dictionary<Region, EncounterPool> regionalPools, Dictionary<string, EncounterPool> globalPools)
         {
             string root = ResolveRootDir();
             if (root == null || !Directory.Exists(root))
@@ -77,7 +77,7 @@ namespace RandomEvents.Encounters
             return count;
         }
 
-        private static int LoadGlobal(string dir, List<EncounterPool> globalPools)
+        private static int LoadGlobal(string dir, Dictionary<string, EncounterPool> globalPools)
         {
             if (!Directory.Exists(dir)) return 0;
             int count = 0;
@@ -87,7 +87,7 @@ namespace RandomEvents.Encounters
                 EncounterPool pool = ReadPool(path, name);
                 if (pool != null && pool.HasAny)
                 {
-                    globalPools.Add(pool);
+                    globalPools[name] = pool;
                     count++;
                 }
             }

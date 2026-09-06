@@ -1,7 +1,10 @@
 # RandomEvents — Encounter Definitions
 
 Each JSON file in this folder defines one **encounter pool**. The mod loads them
-at startup from `<game>/Mods/RandomEvents/` (next to `RandomEvents.dll`).
+from `<game>/Mods/RandomEvents/` (next to `RandomEvents.dll`).
+
+Files are re-read every time a save is loaded. After editing one, return to the main
+menu and load a save; a full game restart is not needed.
 
 ## Layout
 

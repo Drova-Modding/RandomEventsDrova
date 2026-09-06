@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.4 – Regional spawn fixes
+
+- Fixed the regional re-entry cooldown being pushed out by every blocked attempt, which could keep a region from ever firing while the player crossed its border repeatedly.
+- Encounter definitions are re-read on every gameplay load, so edited JSON files no longer need a full game restart.
+
 ## 1.1.3 – Cave & boss area toggles
 
 - Events no longer fire in caves and dungeons, or in the regions that stage a boss fight.
