@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using Drova_Modding_API.Access;
-using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems;
+using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using Drova_Modding_API.Systems.WorldEvents.Regional;
+using Il2CppDrova.Utilities.LazyLoading;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
@@ -20,10 +21,8 @@ namespace RandomEvents.Events
 	/// </summary>
 	public class ScaledRegionalEvent : ARegionalEvent
 	{
-		private readonly EncounterPool _pool;
 		private readonly float _reEntryCooldownSeconds;
 		private readonly bool _runParallel;
-		private readonly float _skipChance;
 		private readonly WaitForSeconds _enterDelayWait;
 		private readonly WaitForSeconds _selfEndWait;
 		private readonly WaitForSeconds _despawnGraceWait;
@@ -34,10 +33,10 @@ namespace RandomEvents.Events
 		private object _safetyToken;
 		private object _despawnToken;
 		private float _lastEndedAtRealtime = float.NegativeInfinity;
+		private bool _suppressCooldownStamp;
 
 		public ScaledRegionalEvent(
 			Region region,
-			EncounterPool pool,
 			float enterDelaySeconds = 8f,
 			float selfEndSeconds = 240f,
 			float reEntryCooldownSeconds = 600f,
@@ -45,15 +44,20 @@ namespace RandomEvents.Events
 			bool runParallel = false)
 			: base(region)
 		{
-			_pool = pool;
 			_reEntryCooldownSeconds = reEntryCooldownSeconds;
 			_runParallel = runParallel;
-			_skipChance = pool.SkipChance;
 			_enterDelayWait = new WaitForSeconds(enterDelaySeconds);
 			_selfEndWait = new WaitForSeconds(selfEndSeconds);
 			_despawnGraceWait = new WaitForSeconds(despawnGraceSeconds);
 			_locator.SetMinMaxRange(new Vector2(260f, 420f));
 		}
+
+		/// <summary>
+		/// The pool this event spawns from, or <c>null</c> when no definition file is loaded for
+		/// the region. Resolved on every trigger rather than captured in the constructor, so a
+		/// definition reload reaches an event that was registered on an earlier load.
+		/// </summary>
+		private EncounterPool Pool => EncounterDefinitions.GetRegional(Region);
 
 		public override bool CanRunParallel() => _runParallel;
 
@@ -97,20 +101,30 @@ namespace RandomEvents.Events
 				return;
 			}
 
+			EncounterPool pool = Pool;
+			if (pool == null)
+			{
+				EndWithoutCooldown();
+				return;
+			}
+
 			// Re-entry cooldown gate.
 			if (Time.realtimeSinceStartup - _lastEndedAtRealtime < _reEntryCooldownSeconds)
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' on cooldown — skipping.");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' on cooldown — skipping.");
                 #endif
-				EndEvent();
+				EndWithoutCooldown();
 				return;
 			}
 
-			if (_skipChance > 0f && UnityEngine.Random.value < _skipChance)
+			// A skip roll is the pool's own outcome, so it starts a cooldown like a real spawn
+			// does. Without that, re-entering until the roll finally passes would defeat skipChance.
+			float skipChance = pool.SkipChance;
+			if (skipChance > 0f && UnityEngine.Random.value < skipChance)
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' skipped by random chance ({_skipChance:P0}).");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped by random chance ({skipChance:P0}).");
                 #endif
 				EndEvent();
 				return;
@@ -119,12 +133,56 @@ namespace RandomEvents.Events
 			if (instance != null && (instance.IsPlayerInBlockedRegion() || WorldEventSystemManager.IsPlayerInDialogueOrTeleporting()))
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' skipped due to player state (in blocked region, dead, or teleporting).");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped due to player state (in blocked region, dead, or teleporting).");
   #endif
-				EndEvent();
+				EndWithoutCooldown();
 				return;
 			}
 			_delayToken = MelonCoroutines.Start(SpawnAfterDelay());
+		}
+
+		public override void EndEvent()
+		{
+			if (_delayToken != null)
+			{
+				MelonCoroutines.Stop(_delayToken);
+				_delayToken = null;
+			}
+			if (_safetyToken != null)
+			{
+				MelonCoroutines.Stop(_safetyToken);
+				_safetyToken = null;
+			}
+
+			// Hand spawned entities off to delayed-despawn instead of killing immediately,
+			// so a quick re-entry can keep them alive.
+			if (_tracker.HasLive() && _despawnToken == null)
+			{
+				_despawnToken = MelonCoroutines.Start(DelayedDespawn());
+			}
+
+			if (_suppressCooldownStamp)
+			{
+				_suppressCooldownStamp = false;
+			}
+			else
+			{
+				_lastEndedAtRealtime = Time.realtimeSinceStartup;
+			}
+
+			base.EndEvent();
+		}
+
+		/// <summary>
+		/// Ends the event without moving the cooldown timestamp. Used for the gates that say
+		/// nothing about the pool: the cooldown itself, a missing definition, and a player state
+		/// the spawn cannot run in. Stamping there would push the next possible spawn a full
+		/// cooldown further out every time the player crossed the region border.
+		/// </summary>
+		private void EndWithoutCooldown()
+		{
+			_suppressCooldownStamp = true;
+			EndEvent();
 		}
 
 		/// <summary>
@@ -160,43 +218,21 @@ namespace RandomEvents.Events
 			base.EndEvent();
 		}
 
-		public override void EndEvent()
-		{
-			if (_delayToken != null)
-			{
-				MelonCoroutines.Stop(_delayToken);
-				_delayToken = null;
-			}
-			if (_safetyToken != null)
-			{
-				MelonCoroutines.Stop(_safetyToken);
-				_safetyToken = null;
-			}
-
-			// Hand spawned entities off to delayed-despawn instead of killing immediately,
-			// so a quick re-entry can keep them alive.
-			if (_tracker.HasLive() && _despawnToken == null)
-			{
-				_despawnToken = MelonCoroutines.Start(DelayedDespawn());
-			}
-
-			_lastEndedAtRealtime = Time.realtimeSinceStartup;
-			base.EndEvent();
-		}
-
 		private IEnumerator SpawnAfterDelay()
 		{
 			yield return _enterDelayWait;
 			if (!IsRunning) yield break;
 
+			EncounterPool pool = Pool;
+			if (pool == null) yield break;
+
 			// A failed read is "not yet", not "level 1". See PlayerLevelHelper.
 			if (!PlayerLevelHelper.TryGetPlayerLevel(out int level)) yield break;
-
-			var table = _pool.Build(level);
+			var table = pool.Build(level);
 			if (table.Count == 0)
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional pool '{_pool.Name}' had nothing eligible for level {level}.");
+				MelonLogger.Msg($"[RandomEvents] Regional pool '{Region}' had nothing eligible for level {level}.");
                 #endif
 				yield break;
 			}
@@ -213,7 +249,7 @@ namespace RandomEvents.Events
 			if (anchor == null)
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' could not find a valid spawn anchor.");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' could not find a valid spawn anchor.");
                 #endif
 				yield break;
 			}
@@ -224,6 +260,7 @@ namespace RandomEvents.Events
 				{
 					Vector2 spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
 					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
+					_tracker.Add(go);
 
 					// Announced with the asset behind it, so a shared session can build the same creature
 					// on the other machine. Without this it exists only here.
@@ -231,12 +268,11 @@ namespace RandomEvents.Events
 					{
 						ActorSpawnAccess.RecordSpawn(go.GetComponent<Il2CppDrova.Actor>(), pair.Key.AssetGUID);
 					}
-					_tracker.Add(go);
 				}
 			}
 
 			// Spawn BanditCreator bandits as lazy actors (do not force immediate load).
-			var banditEntries = _pool.BuildBanditEntries(level);
+			var banditEntries = pool.BuildBanditEntries(level);
 			for (int index = 0; index < banditEntries.Count; index++)
 			{
 				(var entry, int count) = banditEntries[index];
@@ -248,7 +284,7 @@ namespace RandomEvents.Events
 			}
 
             #if DEBUG
-			MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' queued {_tracker.Count} entities at level {level}.");
+			MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' queued {_tracker.Count} entities at level {level}.");
             #endif
 
 			_safetyToken = MelonCoroutines.Start(SafetyEnd());
@@ -270,7 +306,7 @@ namespace RandomEvents.Events
 		private IEnumerator DelayedDespawn()
 		{
 			yield return _despawnGraceWait;
-			MelonLogger.Msg($"[RandomEvents] Regional event '{_pool.Name}' despawning {_tracker.Count} entities after grace period.");
+			MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' despawning {_tracker.Count} entities after grace period.");
 			_tracker.DespawnAll();
 			_despawnToken = null;
 		}

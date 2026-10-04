@@ -24,6 +24,17 @@ Every spawn is rolled fresh from a weighted, level-gated **encounter pool**, so:
 
 The intent is to keep the world feeling alive and dangerous from lvl 1 through the endgame without hand-placing every spawn.
 
+## In-game options
+
+Under **Options → Modding** the mod adds two switches, both **on** by default:
+
+| Switch                               | Effect                                                                                                                                                                    |
+|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| *Block events in caves and dungeons* | Blocks every region `Region.IsCaveRegion()` reports — Mine, Cave, SpiderDungeon, Ruins, RuinUnder, CityDungeon, Library, Academy, RedTower, Ruinexplorer, RuinSchmuggler. |
+| *Block events in boss areas*         | Blocks the regions that stage a boss fight — SpiderDungeon, RuinUnder, Ruins, CityDungeon, Library, RedTower, Schlund, Mutter, Hain.                                      |
+
+Changes apply as soon as the options window closes, no restart needed.
+
 ## Tweaking encounters (no recompile)
 
 All encounter content is data-driven JSON. After installing the mod, edit the files under:
@@ -97,6 +108,8 @@ Encounters/BanditEntry.cs            BanditCreator entry — type + difficulty +
 Events/ScaledEncounterEvent.cs       Global event — re-rolls the spawn list each trigger
 Events/ScaledRegionalEvent.cs        Regional event — re-rolls on region entry
 Util/PlayerLevelHelper.cs            Reads current player level for scaling
+Util/ModOptions.cs                   Options-menu rows + persisted values for the region blocks
+Util/RegionBlocker.cs                Applies the cave / boss-area blocks to the world event system
 Definitions/                         Source-of-truth JSON pools + schema + docs (deployed on build)
 ```
 

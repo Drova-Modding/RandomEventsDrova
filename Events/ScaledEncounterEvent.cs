@@ -18,18 +18,33 @@ namespace RandomEvents.Events
     /// </summary>
     public class ScaledEncounterEvent : EncounterEvent
     {
-        private readonly EncounterPool _pool;
+        private readonly string _poolName;
         private Vector2? _anchor;
         private readonly ActorWorldLocator _banditLocator = new();
         private readonly SpawnTracker _banditTracker = new();
 
-        public ScaledEncounterEvent(EncounterPool pool, int selfEndInSecond = 180)
+        /// <summary>
+        /// Builds the event for the global pool with this name.
+        /// </summary>
+        /// <param name="poolName">Pool name as loaded by <see cref="EncounterLoader"/>.</param>
+        /// <param name="selfEndInSecond">Seconds after which the framework ends the event.</param>
+        public ScaledEncounterEvent(string poolName, int selfEndInSecond = 180)
             : base(new Dictionary<AssetReferenceGameObject, int>(), selfEndInSecond)
         {
-            _pool = pool;
+            _poolName = poolName;
             WorldLocator.SetMinMaxRange(new Vector2(260f, 420f));
             _banditLocator.SetMinMaxRange(new Vector2(260f, 420f));
         }
+
+        /// <summary>
+        /// The pool this event spawns from, or <c>null</c> when its definition file is gone.
+        /// Resolved on every trigger rather than captured in the constructor, so a definition
+        /// reload reaches an event that was registered on an earlier load.
+        /// </summary>
+        private EncounterPool Pool => EncounterDefinitions.GetGlobal(_poolName);
+
+        /// <summary>The pool's name, so a log line or a test can tell the global events apart.</summary>
+        public override string ToString() => _poolName;
 
         public override void StartEvent()
         {
@@ -38,6 +53,14 @@ namespace RandomEvents.Events
             // and both take the loot. Declared once in Core, checked here.
             if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
             {
+                WorldEventSystemManager.Instance?.EndEvent();
+                return;
+            }
+
+            EncounterPool pool = Pool;
+            if (pool == null)
+            {
+                MelonLogger.Warning($"[RandomEvents] Pool '{_poolName}' is no longer loaded — skipping.");
                 WorldEventSystemManager.Instance?.EndEvent();
                 return;
             }
@@ -51,12 +74,12 @@ namespace RandomEvents.Events
                 return;
             }
 
-            var fresh = _pool.Build(level);
-            var banditEntries = _pool.BuildBanditEntries(level);
+            var fresh = pool.Build(level);
+            var banditEntries = pool.BuildBanditEntries(level);
 
             if (fresh.Count == 0 && banditEntries.Count == 0)
             {
-                MelonLogger.Warning($"[RandomEvents] Pool '{_pool.Name}' had no eligible entries for player level — skipping.");
+                MelonLogger.Warning($"[RandomEvents] Pool '{_poolName}' had no eligible entries for player level — skipping.");
                 WorldEventSystemManager.Instance?.EndEvent();
                 return;
             }
@@ -73,7 +96,7 @@ namespace RandomEvents.Events
                 SpawnBanditCreatorEntries(banditEntries);
             }
             #if DEBUG
-            MelonLogger.Msg($"[RandomEvents] Starting event from pool '{_pool.Name}' — {fresh.Count} asset type(s), {banditEntries.Count} bandit type(s).");
+            MelonLogger.Msg($"[RandomEvents] Starting event from pool '{_poolName}' — {fresh.Count} asset type(s), {banditEntries.Count} bandit type(s).");
             #endif
             base.StartEvent();
         }
@@ -87,8 +110,8 @@ namespace RandomEvents.Events
         private void SpawnBanditCreatorEntries(List<(BanditEntry Entry, int Count)> banditEntries)
         {
             // Find an anchor position relative to the player using the dedicated locator.
-            if (!PlayerAccess.TryGetPlayer(out var player)) return;
-            Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.y);
+            if (!Drova_Modding_API.Access.PlayerAccess.TryGetPlayer(out var player)) return;
+            Vector2 playerPos = new(player.transform.position.x, player.transform.position.y);
 
             Vector2? anchor = null;
             for (int attempt = 0; attempt < 8 && anchor == null; attempt++)
@@ -99,7 +122,7 @@ namespace RandomEvents.Events
 
             if (anchor == null)
             {
-                MelonLogger.Warning($"[RandomEvents] Pool '{_pool.Name}': could not find a valid spawn position for BanditCreator bandits.");
+                MelonLogger.Warning($"[RandomEvents] Pool '{_poolName}': could not find a valid spawn position for BanditCreator bandits.");
                 return;
             }
 
@@ -119,7 +142,7 @@ namespace RandomEvents.Events
             }
         }
 
-        protected override void OnEncounterSpawned(GameObject spawnedObject, AssetReferenceGameObject assetReference, Vector2 position)
+        override protected void OnEncounterSpawned(GameObject spawnedObject, AssetReferenceGameObject assetReference, Vector2 position)
         {
             base.OnEncounterSpawned(spawnedObject, assetReference, position);
             if (spawnedObject == null) return;

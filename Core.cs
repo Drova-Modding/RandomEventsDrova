@@ -6,9 +6,10 @@ using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Events;
+using RandomEvents.Util;
 using System.Collections;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.2", "TrustNoOneElse")]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.1.4", "TrustNoOneElse", null)]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 
@@ -16,7 +17,8 @@ namespace RandomEvents
 {
     public class Core : MelonMod
     {
-        private bool _registered;
+        private readonly HashSet<Region> _registeredRegions = [];
+        private readonly HashSet<string> _registeredGlobals = [];
 
         // The events this mod registered, kept so they can be ended directly. The framework only exposes
         // what it currently considers running, and a creature left standing after an event stops being
@@ -26,6 +28,9 @@ namespace RandomEvents
 
         public override void OnInitializeMelon()
         {
+            OptionMenuAccess.Instance.OnOptionMenuOpen += ModOptions.Build;
+            OptionMenuAccess.Instance.OnOptionMenuClose += RegionBlocker.Apply;
+
             // Said once, at startup, and it is what gives every ShouldRun check in this mod its meaning.
             // An encounter is world state: it has to be rolled once, by whoever owns the world, or two
             // players get two unrelated ambushes and neither can see the other fighting. With no co-op
@@ -93,40 +98,58 @@ namespace RandomEvents
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
-            if (sceneName != SceneNames.GameplayMain) return;
-            MelonCoroutines.Start(DelayBlockIntroRegion());
-            if (_registered) return;
-            
-            EncounterDefinitions.Load();
 
-            // Global random events — fired by the API's cooldown timer.
-            foreach (var pool in EncounterDefinitions.GlobalPools)
+            if (sceneName == SceneNames.MainMenu)
             {
-                if (!pool.HasAny) continue;
-                ScaledEncounterEvent worldEvent = new(pool);
+                ModOptions.RegisterLocalization();
+                return;
+            }
+
+            if (sceneName != SceneNames.GameplayMain) return;
+            MelonCoroutines.Start(ApplyRegionBlocks());
+
+            // Definitions are re-read on every gameplay load, so an edited JSON file costs a trip
+            // through the main menu instead of a game restart. Registered events resolve their
+            // pool by key, which is what lets the reloaded values reach them.
+            EncounterDefinitions.Load();
+            RegisterNewPools();
+        }
+
+        /// <summary>
+        /// Registers an event for every pool that does not have one yet. The API has no
+        /// unregister call, so this only ever adds. A pool whose file disappeared keeps its
+        /// event, which then ends immediately because it resolves no definition.
+        /// </summary>
+        private void RegisterNewPools()
+        {
+            // Global random events — fired by the API's cooldown timer.
+            foreach (KeyValuePair<string, EncounterPool> kvp in EncounterDefinitions.GlobalPools)
+            {
+                if (!kvp.Value.HasAny || !_registeredGlobals.Add(kvp.Key)) continue;
+                ScaledEncounterEvent worldEvent = new(kvp.Key);
                 _globalEvents.Add(worldEvent);
                 WorldEventSystemManager.RegisterWorldEvent(worldEvent);
             }
 
             // Regional ambushes — fired when the player enters the region.
-            foreach (var kvp in EncounterDefinitions.RegionalPools)
+            foreach (KeyValuePair<Region, EncounterPool> kvp in EncounterDefinitions.RegionalPools)
             {
-                if (!kvp.Value.HasAny) continue;
-                ScaledRegionalEvent regionalEvent = new(kvp.Key, kvp.Value);
+                if (!kvp.Value.HasAny || !_registeredRegions.Add(kvp.Key)) continue;
+                ScaledRegionalEvent regionalEvent = new(kvp.Key);
                 _regionalEvents.Add(regionalEvent);
                 WorldEventSystemManager.RegisterRegionalEvent(regionalEvent);
             }
 
-            _registered = true;
-            LoggerInstance.Msg($"Registered {EncounterDefinitions.GlobalPools.Count} global pools and {EncounterDefinitions.RegionalPools.Count} regional pools.");
+            LoggerInstance.Msg($"Registered {_registeredGlobals.Count} global pools and {_registeredRegions.Count} regional pools.");
         }
 
-        private static IEnumerator DelayBlockIntroRegion()
+        private static IEnumerator ApplyRegionBlocks()
         {
             while (WorldEventSystemManager.Instance == null)
                 yield return null;
 
             WorldEventSystemManager.Instance.AddBlockedRegion(Region.Intro);
+            RegionBlocker.Apply();
         }
     }
 }
