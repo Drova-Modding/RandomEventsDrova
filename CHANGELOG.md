@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0 - Coop Update
+- Added support for coop
+
 ## 1.1.4 – Regional spawn fixes
 
 - Fixed the regional re-entry cooldown being pushed out by every blocked attempt, which could keep a region from ever firing while the player crossed its border repeatedly.
