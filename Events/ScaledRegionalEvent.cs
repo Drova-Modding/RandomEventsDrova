@@ -82,7 +82,7 @@ namespace RandomEvents.Events
 			// own regional encounter produces two unrelated camps, each visible to one of them.
 			if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
 			{
-				EndEvent();
+				EndWithoutCooldown();
 				return;
 			}
 
@@ -130,10 +130,12 @@ namespace RandomEvents.Events
 				return;
 			}
 			var instance = WorldEventSystemManager.Instance;
-			if (instance != null && (instance.IsPlayerInBlockedRegion() || WorldEventSystemManager.IsPlayerInDialogueOrTeleporting()))
+			// The player this ambush is for: the host's own, or a co-op teammate alone in the region (the host rolls theirs too).
+			if (instance != null && (IsAnchorInBlockedRegion() || (!IsAnchorRemote && WorldEventSystemManager.IsPlayerInDialogueOrTeleporting())))
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped due to player state (in blocked region, dead, or teleporting).");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped: the {(IsAnchorRemote ? "teammate" : "player")} it is for " +
+					(IsAnchorInBlockedRegion() ? "stands in a blocked region." : "is dead, teleporting or in a dialogue."));
   #endif
 				EndWithoutCooldown();
 				return;
@@ -218,27 +220,35 @@ namespace RandomEvents.Events
 			base.EndEvent();
 		}
 
+		// Every way out before spawning ends the event (without a cooldown: nothing was rolled). Left running, the
+		// coordinator never started it again - a teammate's body not on the host yet in the first seconds of a join kept
+		// that region silent for the rest of the game.
 		private IEnumerator SpawnAfterDelay()
 		{
 			yield return _enterDelayWait;
 			if (!IsRunning) yield break;
 
+			// A teammate's regions reach the host one by one, so the blocked one may have arrived only after the start.
+			if (IsAnchorInBlockedRegion()) { _delayToken = null; EndWithoutCooldown(); yield break; }
+
 			EncounterPool pool = Pool;
-			if (pool == null) yield break;
+			if (pool == null) { _delayToken = null; EndWithoutCooldown(); yield break; }
 
 			// A failed read is "not yet", not "level 1". See PlayerLevelHelper.
-			if (!PlayerLevelHelper.TryGetPlayerLevel(out int level)) yield break;
+			if (!PlayerLevelHelper.TryGetPlayerLevel(out int level)) { _delayToken = null; EndWithoutCooldown(); yield break; }
 			var table = pool.Build(level);
 			if (table.Count == 0)
 			{
                 #if DEBUG
 				MelonLogger.Msg($"[RandomEvents] Regional pool '{Region}' had nothing eligible for level {level}.");
                 #endif
+				_delayToken = null;
+				EndWithoutCooldown();
 				yield break;
 			}
 
-			if (!PlayerAccess.TryGetPlayer(out var player)) yield break;
-			var origin = player.transform.position;
+			// Around the player it is for, which in co-op may be a teammate rather than this machine's player.
+			if (!TryGetAnchor(out Vector2 origin)) { _delayToken = null; EndWithoutCooldown(); yield break; }
 
 			Vector2? anchor = null;
 			for (int attempt = 0; attempt < 8 && anchor == null; attempt++)
@@ -251,6 +261,8 @@ namespace RandomEvents.Events
                 #if DEBUG
 				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' could not find a valid spawn anchor.");
                 #endif
+				_delayToken = null;
+				EndWithoutCooldown();
 				yield break;
 			}
 
