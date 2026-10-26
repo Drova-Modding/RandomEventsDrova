@@ -1,6 +1,7 @@
-using System.Collections;
+﻿using System.Collections;
 using Drova_Modding_API.Access;
 using Drova_Modding_API.Systems;
+using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using Drova_Modding_API.Systems.WorldEvents.Regional;
@@ -77,6 +78,14 @@ namespace RandomEvents.Events
 
 		public override void StartEvent()
 		{
+			// Only the machine that owns the shared world spawns anything. Two players each rolling their
+			// own regional encounter produces two unrelated camps, each visible to one of them.
+			if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
+			{
+				EndWithoutCooldown();
+				return;
+			}
+
 			base.StartEvent();
 
 			// Player came back while previous creatures are still alive (despawn was pending).
@@ -121,10 +130,12 @@ namespace RandomEvents.Events
 				return;
 			}
 			var instance = WorldEventSystemManager.Instance;
-			if (instance != null && (instance.IsPlayerInBlockedRegion() || WorldEventSystemManager.IsPlayerInDialogueOrTeleporting()))
+			// The player this ambush is for: the host's own, or a co-op teammate alone in the region (the host rolls theirs too).
+			if (instance != null && (IsAnchorInBlockedRegion() || (!IsAnchorRemote && WorldEventSystemManager.IsPlayerInDialogueOrTeleporting())))
 			{
                 #if DEBUG
-				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped due to player state (in blocked region, dead, or teleporting).");
+				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' skipped: the {(IsAnchorRemote ? "teammate" : "player")} it is for " +
+					(IsAnchorInBlockedRegion() ? "stands in a blocked region." : "is dead, teleporting or in a dialogue."));
   #endif
 				EndWithoutCooldown();
 				return;
@@ -176,26 +187,68 @@ namespace RandomEvents.Events
 			EndEvent();
 		}
 
+		/// <summary>
+		/// Ends this event and takes its creatures away now, because the world stopped being ours.
+		///
+		/// **The grace period the ordinary ending uses is exactly wrong here.** That exists so a player who
+		/// steps out of a region and straight back in keeps the fight they were in. Joining somebody else's
+		/// world is not stepping out: these creatures were rolled here, the host has never heard of them,
+		/// and every second they are left standing is a second this player spends fighting something nobody
+		/// else can see. There is no re-entry that would want them back.
+		/// </summary>
+		public void AbandonForCoop()
+		{
+			if (_delayToken != null)
+			{
+				MelonCoroutines.Stop(_delayToken);
+				_delayToken = null;
+			}
+			if (_safetyToken != null)
+			{
+				MelonCoroutines.Stop(_safetyToken);
+				_safetyToken = null;
+			}
+			if (_despawnToken != null)
+			{
+				MelonCoroutines.Stop(_despawnToken);
+				_despawnToken = null;
+			}
+
+			_tracker.DespawnAll();
+			_lastEndedAtRealtime = Time.realtimeSinceStartup;
+
+			base.EndEvent();
+		}
+
+		// Every way out before spawning ends the event (without a cooldown: nothing was rolled). Left running, the
+		// coordinator never started it again - a teammate's body not on the host yet in the first seconds of a join kept
+		// that region silent for the rest of the game.
 		private IEnumerator SpawnAfterDelay()
 		{
 			yield return _enterDelayWait;
 			if (!IsRunning) yield break;
 
-			EncounterPool pool = Pool;
-			if (pool == null) yield break;
+			// A teammate's regions reach the host one by one, so the blocked one may have arrived only after the start.
+			if (IsAnchorInBlockedRegion()) { _delayToken = null; EndWithoutCooldown(); yield break; }
 
-			int level = PlayerLevelHelper.GetPlayerLevel();
+			EncounterPool pool = Pool;
+			if (pool == null) { _delayToken = null; EndWithoutCooldown(); yield break; }
+
+			// A failed read is "not yet", not "level 1". See PlayerLevelHelper.
+			if (!PlayerLevelHelper.TryGetPlayerLevel(out int level)) { _delayToken = null; EndWithoutCooldown(); yield break; }
 			var table = pool.Build(level);
 			if (table.Count == 0)
 			{
                 #if DEBUG
 				MelonLogger.Msg($"[RandomEvents] Regional pool '{Region}' had nothing eligible for level {level}.");
                 #endif
+				_delayToken = null;
+				EndWithoutCooldown();
 				yield break;
 			}
 
-			if (!PlayerAccess.TryGetPlayer(out var player)) yield break;
-			var origin = player.transform.position;
+			// Around the player it is for, which in co-op may be a teammate rather than this machine's player.
+			if (!TryGetAnchor(out Vector2 origin)) { _delayToken = null; EndWithoutCooldown(); yield break; }
 
 			Vector2? anchor = null;
 			for (int attempt = 0; attempt < 8 && anchor == null; attempt++)
@@ -208,6 +261,8 @@ namespace RandomEvents.Events
                 #if DEBUG
 				MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' could not find a valid spawn anchor.");
                 #endif
+				_delayToken = null;
+				EndWithoutCooldown();
 				yield break;
 			}
 
@@ -218,6 +273,13 @@ namespace RandomEvents.Events
 					Vector2 spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
 					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
 					_tracker.Add(go);
+
+					// Announced with the asset behind it, so a shared session can build the same creature
+					// on the other machine. Without this it exists only here.
+					if (go != null)
+					{
+						ActorSpawnAccess.RecordSpawn(go.GetComponent<Il2CppDrova.Actor>(), pair.Key.AssetGUID);
+					}
 				}
 			}
 

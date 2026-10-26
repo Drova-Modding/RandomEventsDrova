@@ -1,3 +1,4 @@
+using Drova_Modding_API.Access;
 using Il2CppDrova.Utilities.LazyLoading;
 using UnityEngine;
 
@@ -45,8 +46,15 @@ namespace RandomEvents.Util
         }
 
         /// <summary>
-        /// Destroys all tracked <see cref="GameObject"/>s and unloads all tracked
-        /// <see cref="LazyActor"/>s, then clears both lists.
+        /// Removes everything this tracker spawned, then clears both lists.
+        ///
+        /// **The lazy half used to destroy the wrong object.** <c>Object.Destroy</c> on a
+        /// <see cref="LazyActor"/> destroys the component; the creature it spawned is a separate child
+        /// object registered separately as an entity, and the component's own <c>OnDestroy</c> unregisters
+        /// its handle without touching the body. So an event that ended after its bandits had materialised
+        /// left them alive and hostile in the world for the rest of the session, while this method
+        /// reported success. <see cref="ActorSpawnAccess"/> owns the correct teardown - it kills a body a
+        /// player may have seen, and quietly removes a handle that never loaded.
         /// </summary>
         public void DespawnAll()
         {
@@ -55,7 +63,7 @@ namespace RandomEvents.Util
             _gameObjects.Clear();
 
             foreach (var lazy in _lazyActors)
-                if (lazy != null && !lazy.IsDestroyed) UnityEngine.Object.Destroy(lazy);
+                ActorSpawnAccess.TryKillOrDespawn(lazy);
             _lazyActors.Clear();
         }
     }

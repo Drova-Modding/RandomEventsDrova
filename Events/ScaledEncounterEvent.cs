@@ -1,3 +1,5 @@
+﻿using Drova_Modding_API.Access;
+using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
 using MelonLoader;
@@ -41,8 +43,20 @@ namespace RandomEvents.Events
         /// </summary>
         private EncounterPool Pool => EncounterDefinitions.GetGlobal(_poolName);
 
+        /// <summary>The pool's name, so a log line or a test can tell the global events apart.</summary>
+        public override string ToString() => _poolName;
+
         public override void StartEvent()
         {
+            // Only the machine that owns the shared world rolls an encounter. Without this, two players
+            // each roll their own: different creatures, in different places, each visible to one of them,
+            // and both take the loot. Declared once in Core, checked here.
+            if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
+            {
+                WorldEventSystemManager.Instance?.EndEvent();
+                return;
+            }
+
             EncounterPool pool = Pool;
             if (pool == null)
             {
@@ -51,7 +65,14 @@ namespace RandomEvents.Events
                 return;
             }
 
-            int level = PlayerLevelHelper.GetPlayerLevel();
+            // Not "the player is level 1" - the stats are unreadable for a frame or two after a world
+            // load, and building from that would silently produce the weakest encounter in the pool.
+            if (!PlayerLevelHelper.TryGetPlayerLevel(out int level))
+            {
+                MelonLogger.Warning("[RandomEvents] The player's level is not readable yet — skipping this event.");
+                WorldEventSystemManager.Instance?.EndEvent();
+                return;
+            }
 
             var fresh = pool.Build(level);
             var banditEntries = pool.BuildBanditEntries(level);
