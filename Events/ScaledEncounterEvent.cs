@@ -2,6 +2,7 @@
 using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
+using Il2CppDrova.Utilities.LazyLoading;
 using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
@@ -48,9 +49,7 @@ namespace RandomEvents.Events
 
         public override void StartEvent()
         {
-            // Only the machine that owns the shared world rolls an encounter. Without this, two players
-            // each roll their own: different creatures, in different places, each visible to one of them,
-            // and both take the loot. Declared once in Core, checked here.
+            // Only the world owner rolls an encounter, or each co-op player gets a different one.
             if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
             {
                 WorldEventSystemManager.Instance?.EndEvent();
@@ -65,8 +64,7 @@ namespace RandomEvents.Events
                 return;
             }
 
-            // Not "the player is level 1" - the stats are unreadable for a frame or two after a world
-            // load, and building from that would silently produce the weakest encounter in the pool.
+            // The stats are unreadable for the first frames of a world. Level 1 would build the weakest encounter.
             if (!PlayerLevelHelper.TryGetPlayerLevel(out int level))
             {
                 MelonLogger.Warning("[RandomEvents] The player's level is not readable yet — skipping this event.");
@@ -126,6 +124,7 @@ namespace RandomEvents.Events
                 return;
             }
 
+            List<LazyActor> group = [];
             bool first = true;
             foreach (var (entry, count) in banditEntries)
             {
@@ -135,11 +134,15 @@ namespace RandomEvents.Events
                     first = false;
                     var lazyActor = entry.Spawn("Bandit", spot);
                     _banditTracker.Add(lazyActor);
+                    group.Add(lazyActor);
                     #if DEBUG
                     MelonLogger.Msg($"[Queued lazy BanditCreator bandit '{lazyActor.GUID}' at {spot}.");
                     #endif
                 }
             }
+
+            // A bandit waits at its spawn point, so it has to notice the player from there.
+            EnemyAccess.MakeAggressiveGroup(group, BanditEntry.AggroRange);
         }
 
         override protected void OnEncounterSpawned(GameObject spawnedObject, AssetReferenceGameObject assetReference, Vector2 position)

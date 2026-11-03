@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 - Bandit Groups
+- Bandits of one event fight as a group: once one of them fights, the others join in.
+- Bandits notice the player from where they spawn and chase further, instead of walking to where the player stood when the event started.
+- Requires Drova Modding API 0.8.0 or newer.
+
 ## 1.2.0 - Coop Update
 - Added support for coop
 

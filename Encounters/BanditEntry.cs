@@ -30,6 +30,11 @@ namespace RandomEvents.Encounters
     /// </summary>
     public class BanditEntry
     {
+        /// <summary>
+        /// How far a spawned group notices and chases the player. Covers the 260 to 420 units it spawns from the player.
+        /// </summary>
+        public const float AggroRange = 450f;
+
         /// <summary>Weapon archetype for this bandit slot.</summary>
         public BanditType Type { get; }
 
