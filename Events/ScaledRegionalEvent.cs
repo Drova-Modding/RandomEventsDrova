@@ -78,8 +78,7 @@ namespace RandomEvents.Events
 
 		public override void StartEvent()
 		{
-			// Only the machine that owns the shared world spawns anything. Two players each rolling their
-			// own regional encounter produces two unrelated camps, each visible to one of them.
+			// Only the world owner spawns, or each co-op player gets a different camp.
 			if (!CoopAccess.ShouldRun(CoopBehavior.AuthorityGated))
 			{
 				EndWithoutCooldown();
@@ -188,13 +187,8 @@ namespace RandomEvents.Events
 		}
 
 		/// <summary>
-		/// Ends this event and takes its creatures away now, because the world stopped being ours.
-		///
-		/// **The grace period the ordinary ending uses is exactly wrong here.** That exists so a player who
-		/// steps out of a region and straight back in keeps the fight they were in. Joining somebody else's
-		/// world is not stepping out: these creatures were rolled here, the host has never heard of them,
-		/// and every second they are left standing is a second this player spends fighting something nobody
-		/// else can see. There is no re-entry that would want them back.
+		/// Ends this event and removes its creatures at once, because the world now belongs to another player.
+		/// The usual re-entry grace period does not apply: the host never saw these creatures.
 		/// </summary>
 		public void AbandonForCoop()
 		{
@@ -220,9 +214,9 @@ namespace RandomEvents.Events
 			base.EndEvent();
 		}
 
-		// Every way out before spawning ends the event (without a cooldown: nothing was rolled). Left running, the
-		// coordinator never started it again - a teammate's body not on the host yet in the first seconds of a join kept
-		// that region silent for the rest of the game.
+		/// <summary>
+		/// Every early exit ends the event without a cooldown. A running event is never started again, so the region would stay silent.
+		/// </summary>
 		private IEnumerator SpawnAfterDelay()
 		{
 			yield return _enterDelayWait;
@@ -274,8 +268,7 @@ namespace RandomEvents.Events
 					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
 					_tracker.Add(go);
 
-					// Announced with the asset behind it, so a shared session can build the same creature
-					// on the other machine. Without this it exists only here.
+					// Recorded with its asset, so a co-op session can build the same creature on the other machine.
 					if (go != null)
 					{
 						ActorSpawnAccess.RecordSpawn(go.GetComponent<Il2CppDrova.Actor>(), pair.Key.AssetGUID);
@@ -285,15 +278,21 @@ namespace RandomEvents.Events
 
 			// Spawn BanditCreator bandits as lazy actors (do not force immediate load).
 			var banditEntries = pool.BuildBanditEntries(level);
+			List<LazyActor> bandits = [];
 			for (int index = 0; index < banditEntries.Count; index++)
 			{
 				(var entry, int count) = banditEntries[index];
 				for (int i = 0; i < count; i++)
 				{
 					var spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
-					_tracker.Add(entry.Spawn("Bandit", spot));
+					LazyActor bandit = entry.Spawn("Bandit", spot);
+					_tracker.Add(bandit);
+					bandits.Add(bandit);
 				}
 			}
+
+			// A bandit waits at its spawn point, so it has to notice the player from there.
+			EnemyAccess.MakeAggressiveGroup(bandits, BanditEntry.AggroRange);
 
             #if DEBUG
 			MelonLogger.Msg($"[RandomEvents] Regional event '{Region}' queued {_tracker.Count} entities at level {level}.");
