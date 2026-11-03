@@ -121,7 +121,7 @@ Requirements:
 
 - .NET 6 SDK
 - Drova – Forsaken Kin with MelonLoader installed
-- [Drova Modding API](https://github.com/Drova-Modding/Drova-Modding-API) mod installed
+- [Drova Modding API](https://github.com/Drova-Modding/Drova-Modding-API) 0.8.0 or newer installed
 
 ## License
 

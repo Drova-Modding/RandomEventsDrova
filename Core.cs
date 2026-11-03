@@ -9,7 +9,7 @@ using RandomEvents.Events;
 using RandomEvents.Util;
 using System.Collections;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.2.0", "TrustNoOneElse")]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.3.0", "TrustNoOneElse")]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 
@@ -20,9 +20,7 @@ namespace RandomEvents
         private readonly HashSet<Region> _registeredRegions = [];
         private readonly HashSet<string> _registeredGlobals = [];
 
-        // The events this mod registered, kept so they can be ended directly. The framework only exposes
-        // what it currently considers running, and a creature left standing after an event stops being
-        // "running" is exactly the case that has to be cleaned up on joining somebody else's world.
+        /// <summary>Kept here because the framework lists only running events, but a finished event's creatures still stand in the world.</summary>
         private readonly List<ScaledEncounterEvent> _globalEvents = [];
         private readonly List<ScaledRegionalEvent> _regionalEvents = [];
 
@@ -31,18 +29,11 @@ namespace RandomEvents
             OptionMenuAccess.Instance.OnOptionMenuOpen += ModOptions.Build;
             OptionMenuAccess.Instance.OnOptionMenuClose += RegionBlocker.Apply;
 
-            // Said once, at startup, and it is what gives every ShouldRun check in this mod its meaning.
-            // An encounter is world state: it has to be rolled once, by whoever owns the world, or two
-            // players get two unrelated ambushes and neither can see the other fighting. With no co-op
-            // mod installed the local machine is the authority, so single-player is unaffected.
+            // Only the world owner rolls encounters, or co-op players each get their own unrelated ambush.
+            // Without a co-op mod the local machine is the owner.
             CoopAccess.Declare(CoopBehavior.AuthorityGated);
 
-            // **Declaring only covers events that have not started yet, and that is the smaller half.** A
-            // session is joined from a world that is already running, so the ordinary way into a shared game
-            // is with an ambush in progress: creatures this machine rolled, standing in this machine's world,
-            // that the host has never heard of. The gate in StartEvent cannot reach those - they are already
-            // past it. So the change is listened for too, and whatever is running is ended the moment this
-            // machine stops being the one that decides what the world contains.
+            // Joining a session mid-ambush leaves creatures the host never saw, so they are ended on the switch.
             CoopAccess.OnSessionChanged += OnSessionChanged;
 
             LoggerInstance.Msg("Initialized.");
@@ -50,10 +41,7 @@ namespace RandomEvents
 
         /// <summary>
         /// Ends everything this mod is running once the local machine is no longer the world authority.
-        ///
-        /// Fires on joining and on leaving, and deliberately does nothing in the second direction: becoming
-        /// the authority again does not restart anything, because an ambush is rolled for where the player is
-        /// standing and a resumed one would put creatures somewhere they left minutes ago.
+        /// Becoming the authority again restarts nothing, since an ambush belongs to where the player stood.
         /// </summary>
         private void OnSessionChanged()
         {
@@ -65,16 +53,11 @@ namespace RandomEvents
 
                 if (manager != null && manager.CurrentEvent != null)
                 {
-                    // Through the manager rather than the event, so its own CurrentEvent is cleared as well
-                    // and the cooldown that would pick the next one starts from here.
+                    // Through the manager, so its CurrentEvent clears and the next cooldown starts now.
                     manager.EndEvent();
                 }
 
-                // **Every event this mod registered, not the ones the framework calls running.** An event
-                // that has finished spawning and stopped running still has its creatures standing in the
-                // world, waiting out a grace period that exists only for a player stepping back into a
-                // region. "Which events are running" is a different question from "what did this mod put
-                // into this world", and only the second one needs clearing up here.
+                // Every registered event, since a finished one keeps its creatures through a re-entry grace period.
                 for (int index = 0; index < _globalEvents.Count; index++)
                 {
                     _globalEvents[index].EndEvent();
