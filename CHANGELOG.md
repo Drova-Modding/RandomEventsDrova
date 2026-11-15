@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0 - Bandit Variety
+- New bandit types for encounter files: `SwordBow`, `SpearBow`, `SwordNet`, `AxeNet`, `SpearNet`, `SwordKnives` and `SpearKnives` (net is the Fangnetz). `Random` picks them too. The Bandit Raid, Mine and Ruins events now spawn them from mid levels on.
+- `Dagger` bandits fight with a sword: NPCs with a dagger could circle the player without ever striking.
+- Requires Drova Modding API 0.9.0 or newer.
+
 ## 1.3.0 - Bandit Groups
 - Bandits of one event fight as a group: once one of them fights, the others join in.
 - Bandits notice the player from where they spawn and chase further, instead of walking to where the player stood when the event started.

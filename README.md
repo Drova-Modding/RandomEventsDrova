@@ -61,7 +61,7 @@ A pool file looks like this:
     { "creature": "Boar", "minLevel": 1, "maxLevel": 20, "weight": 2.0, "baseCount": 1, "countGrowth": 2 },
 
     // BanditCreator bandit — recommended for all bandit entries
-    // banditType:       archetype (Dagger | Sword | Axe | SwordShield | Spear | SpearShield | Bow | SpearSlingshot | SwordSlingshot | Random)
+    // banditType:       archetype (Dagger | Sword | Axe | SwordShield | Spear | SpearShield | Bow | SpearSlingshot | SwordSlingshot | SwordBow | SpearBow | SwordNet | AxeNet | SpearNet | SwordKnives | SpearKnives | Random)
     // banditDifficulty: gear tier  (Easy | Normal | Hard)  — defaults to Normal
     { "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 8, "maxLevel": 25, "weight": 1.5, "baseCount": 1, "countGrowth": 3 }
   ]
@@ -121,7 +121,7 @@ Requirements:
 
 - .NET 6 SDK
 - Drova – Forsaken Kin with MelonLoader installed
-- [Drova Modding API](https://github.com/Drova-Modding/Drova-Modding-API) 0.8.0 or newer installed
+- [Drova Modding API](https://github.com/Drova-Modding/Drova-Modding-API) 0.9.0 or newer installed
 
 ## License
 
