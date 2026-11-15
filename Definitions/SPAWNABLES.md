@@ -176,7 +176,7 @@ with role-appropriate gear, talent progression, and randomised cosmetics
 | Value              | Weapon loadout                              |
 |--------------------|---------------------------------------------|
 | `Random`           | Random choice from all archetypes per spawn |
-| `Dagger`           | Dagger                                      |
+| `Dagger`           | Sword (dagger NPCs never strike)            |
 | `Sword`            | Sword                                       |
 | `Axe`              | Axe                                         |
 | `SwordShield`      | Sword + Shield                              |
@@ -185,6 +185,13 @@ with role-appropriate gear, talent progression, and randomised cosmetics
 | `Bow`              | Bow + Quiver                                |
 | `SpearSlingshot`   | Spear + Slingshot (mixed melee / ranged)    |
 | `SwordSlingshot`   | Sword + Slingshot (mixed melee / ranged)    |
+| `SwordBow`         | Sword + Bow (mixed melee / ranged)          |
+| `SpearBow`         | Spear + Bow (mixed melee / ranged)          |
+| `SwordNet`         | Sword + throwing net (Fangnetz)             |
+| `AxeNet`           | Axe + throwing net (Fangnetz)               |
+| `SpearNet`         | Spear + throwing net (Fangnetz)             |
+| `SwordKnives`      | Sword + throwing knives                     |
+| `SpearKnives`      | Spear + throwing knives                     |
 
 ### `banditDifficulty` — equipment quality tier
 

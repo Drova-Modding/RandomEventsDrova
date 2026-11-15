@@ -124,7 +124,14 @@
         "SpearShield",
         "Bow",
         "SpearSlingshot",
-        "SwordSlingshot"
+        "SwordSlingshot",
+        "SwordBow",
+        "SpearBow",
+        "SwordNet",
+        "AxeNet",
+        "SpearNet",
+        "SwordKnives",
+        "SpearKnives"
       ]
     },
     "banditDifficulty": {
