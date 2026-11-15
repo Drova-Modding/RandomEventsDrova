@@ -198,7 +198,8 @@ namespace RandomEvents.Encounters
             public string Bandit { get; set; }
             /// <summary>
             /// BanditCreator archetype name. One of: Random, Dagger, Sword, Axe, SwordShield,
-            /// Spear, SpearShield, Bow, SpearSlingshot, SwordSlingshot.
+            /// Spear, SpearShield, Bow, SpearSlingshot, SwordSlingshot, SwordBow, SpearBow, SwordNet, AxeNet,
+            /// SpearNet, SwordKnives, SpearKnives.
             /// Mutually exclusive with <c>creature</c> and <c>bandit</c>.
             /// </summary>
             public string BanditType { get; set; }

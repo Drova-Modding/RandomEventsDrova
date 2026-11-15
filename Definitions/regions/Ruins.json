@@ -6,6 +6,9 @@
   "entries": [
     { "banditType": "Sword",       "banditDifficulty": "Normal", "minLevel": 20, "maxLevel": 40, "weight": 2.0, "baseCount": 2, "countGrowth": 3 },
     { "banditType": "SwordShield", "banditDifficulty": "Normal", "minLevel": 20, "maxLevel": 40, "weight": 1.5, "baseCount": 2, "countGrowth": 3 },
-    { "banditType": "Axe",         "banditDifficulty": "Hard",   "minLevel": 25, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+    { "banditType": "Axe",         "banditDifficulty": "Hard",   "minLevel": 25, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "SwordBow",    "banditDifficulty": "Normal", "minLevel": 20, "maxLevel": 40, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "SpearNet",    "banditDifficulty": "Hard",   "minLevel": 24, "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "SwordKnives", "banditDifficulty": "Hard",   "minLevel": 25, "maxLevel": 40, "weight": 0.8, "baseCount": 1, "countGrowth": 2 }
   ]
 }

@@ -20,7 +20,14 @@ namespace RandomEvents.Encounters
         SpearShield,
         Bow,
         SpearSlingshot,
-        SwordSlingshot
+        SwordSlingshot,
+        SwordBow,
+        SpearBow,
+        SwordNet,
+        AxeNet,
+        SpearNet,
+        SwordKnives,
+        SpearKnives
     }
 
     /// <summary>
@@ -105,6 +112,13 @@ namespace RandomEvents.Encounters
                 BanditType.Bow            => BanditCreator.CreateBowBanditLazy(name, position, Difficulty),
                 BanditType.SpearSlingshot => BanditCreator.CreateSpearSlingshotBanditLazy(name, position, Difficulty),
                 BanditType.SwordSlingshot => BanditCreator.CreateSwordSlingshotBanditLazy(name, position, Difficulty),
+                BanditType.SwordBow       => BanditCreator.CreateSwordBowBanditLazy(name, position, Difficulty),
+                BanditType.SpearBow       => BanditCreator.CreateSpearBowBanditLazy(name, position, Difficulty),
+                BanditType.SwordNet       => BanditCreator.CreateSwordNetBanditLazy(name, position, Difficulty),
+                BanditType.AxeNet         => BanditCreator.CreateAxeNetBanditLazy(name, position, Difficulty),
+                BanditType.SpearNet       => BanditCreator.CreateSpearNetBanditLazy(name, position, Difficulty),
+                BanditType.SwordKnives    => BanditCreator.CreateSwordKnivesBanditLazy(name, position, Difficulty),
+                BanditType.SpearKnives    => BanditCreator.CreateSpearKnivesBanditLazy(name, position, Difficulty),
                 _                         => BanditCreator.CreateRandomBanditLazy(name, position, Difficulty)
             };
         }

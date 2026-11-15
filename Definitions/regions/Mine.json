@@ -8,6 +8,8 @@
     { "creature": "StoneFist_DeepMine", "minLevel": 22, "maxLevel": 40, "weight": 0.7, "baseCount": 1, "countGrowth": 1 },
     { "banditType": "Dagger",           "banditDifficulty": "Easy",   "minLevel": 5,  "maxLevel": 15, "weight": 1.5, "baseCount": 2, "countGrowth": 3 },
     { "banditType": "Axe",              "banditDifficulty": "Normal", "minLevel": 8,  "maxLevel": 28, "weight": 1.2, "baseCount": 1, "countGrowth": 2 },
-    { "banditType": "SpearSlingshot",   "banditDifficulty": "Normal", "minLevel": 14, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 }
+    { "banditType": "SpearSlingshot",   "banditDifficulty": "Normal", "minLevel": 14, "maxLevel": 35, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "SpearNet",         "banditDifficulty": "Normal", "minLevel": 10, "maxLevel": 30, "weight": 1.0, "baseCount": 1, "countGrowth": 2 },
+    { "banditType": "SwordKnives",      "banditDifficulty": "Normal", "minLevel": 12, "maxLevel": 32, "weight": 0.8, "baseCount": 1, "countGrowth": 2 }
   ]
 }

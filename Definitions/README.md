@@ -101,7 +101,7 @@ Each entry must use **exactly one** of the three spawn strategies:
 | `banditType`       | Weapon loadout                           |
 |--------------------|------------------------------------------|
 | `Random`           | Random choice from all archetypes        |
-| `Dagger`           | Dagger                                   |
+| `Dagger`           | Sword (dagger NPCs never strike)         |
 | `Sword`            | Sword                                    |
 | `Axe`              | Axe                                      |
 | `SwordShield`      | Sword + Shield                           |
@@ -110,6 +110,13 @@ Each entry must use **exactly one** of the three spawn strategies:
 | `Bow`              | Bow + Quiver                             |
 | `SpearSlingshot`   | Spear + Slingshot (mixed melee/ranged)   |
 | `SwordSlingshot`   | Sword + Slingshot (mixed melee/ranged)   |
+| `SwordBow`         | Sword + Bow (mixed melee/ranged)         |
+| `SpearBow`         | Spear + Bow (mixed melee/ranged)         |
+| `SwordNet`         | Sword + throwing net (Fangnetz)          |
+| `AxeNet`           | Axe + throwing net (Fangnetz)            |
+| `SpearNet`         | Spear + throwing net (Fangnetz)          |
+| `SwordKnives`      | Sword + throwing knives                  |
+| `SpearKnives`      | Spear + throwing knives                  |
 
 ### BanditCreator — `banditDifficulty` values
 
