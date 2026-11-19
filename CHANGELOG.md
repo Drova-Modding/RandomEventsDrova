@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.1 - Spider Fix
+- Glowing forest (Leuchtwald) events no longer spawn the `BigSpider_Leuchtwald_Spot_01` spider. That prefab can never die: it heals whenever its health reaches 0, so it always survived with one heart. The other Leuchtwald spider takes its spawn weight.
+
 ## 1.4.0 - Bandit Variety
 - New bandit types for encounter files: `SwordBow`, `SpearBow`, `SwordNet`, `AxeNet`, `SpearNet`, `SwordKnives` and `SpearKnives` (net is the Fangnetz). `Random` picks them too. The Bandit Raid, Mine and Ruins events now spawn them from mid levels on.
 - `Dagger` bandits fight with a sword: NPCs with a dagger could circle the player without ever striking.
