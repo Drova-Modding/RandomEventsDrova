@@ -68,6 +68,8 @@ Use as `"creature": "<name>"` in an entry.
 `BigSpider`, `BigSpider_AuwaldDungeon`, `BigSpider_Leuchtwald_Spot_01`,
 `BigSpider_Leuchtwald_Spot_02`
 
+> `BigSpider_Leuchtwald_Spot_01` carries `HealthBhvr_CannotDie` (heals at 0 HP): it can't be killed. Don't use it.
+
 ### Spitters / Splitters
 `Spitter`, `Spitter_Weak`, `Spitter_ExtraWeak`, `Spitter_ForestDungeonBoss`,
 `Splitter_SpiderBossForest_Actual`, `Snapper_ForestDungeonBoss`,
