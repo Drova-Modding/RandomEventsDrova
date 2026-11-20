@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using Drova_Modding_API.Access;
 using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Coop;

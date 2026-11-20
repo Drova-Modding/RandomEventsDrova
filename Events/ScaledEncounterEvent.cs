@@ -1,4 +1,4 @@
-﻿using Drova_Modding_API.Access;
+using Drova_Modding_API.Access;
 using Drova_Modding_API.Systems.Coop;
 using Drova_Modding_API.Systems.Spawning;
 using Drova_Modding_API.Systems.WorldEvents;
