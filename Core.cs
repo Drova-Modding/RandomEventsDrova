@@ -1,4 +1,4 @@
-﻿using Drova_Modding_API.Access;
+using Drova_Modding_API.Access;
 using Drova_Modding_API.GlobalFields;
 using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Coop;
@@ -9,7 +9,7 @@ using RandomEvents.Events;
 using RandomEvents.Util;
 using System.Collections;
 
-[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.4.1", "TrustNoOneElse")]
+[assembly: MelonInfo(typeof(RandomEvents.Core), "RandomEvents", "1.4.2", "TrustNoOneElse")]
 [assembly: MelonGame("Just2D", "Drova")]
 [assembly: MelonAdditionalDependencies("Drova_Modding_API")]
 

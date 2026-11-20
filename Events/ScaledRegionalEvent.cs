@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using Drova_Modding_API.Access;
 using Drova_Modding_API.Systems;
 using Drova_Modding_API.Systems.Coop;
@@ -10,6 +10,8 @@ using MelonLoader;
 using RandomEvents.Encounters;
 using RandomEvents.Util;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using Object = UnityEngine.Object;
 
 namespace RandomEvents.Events
 {
@@ -34,6 +36,7 @@ namespace RandomEvents.Events
 		private object _despawnToken;
 		private float _lastEndedAtRealtime = float.NegativeInfinity;
 		private bool _suppressCooldownStamp;
+		private int _run;
 
 		public ScaledRegionalEvent(
 			Region region,
@@ -139,11 +142,12 @@ namespace RandomEvents.Events
 				EndWithoutCooldown();
 				return;
 			}
-			_delayToken = MelonCoroutines.Start(SpawnAfterDelay());
+			_delayToken = MelonCoroutines.Start(SpawnAfterDelay(++_run));
 		}
 
 		public override void EndEvent()
 		{
+			_run++;
 			if (_delayToken != null)
 			{
 				MelonCoroutines.Stop(_delayToken);
@@ -192,6 +196,7 @@ namespace RandomEvents.Events
 		/// </summary>
 		public void AbandonForCoop()
 		{
+			_run++;
 			if (_delayToken != null)
 			{
 				MelonCoroutines.Stop(_delayToken);
@@ -216,8 +221,10 @@ namespace RandomEvents.Events
 
 		/// <summary>
 		/// Every early exit ends the event without a cooldown. A running event is never started again, so the region would stay silent.
+		/// Creatures load one at a time and asynchronously. Once they load, <see cref="EndEvent"/> moves <paramref name="run"/> on
+		/// rather than stopping this, so an instance arriving for an ended run is destroyed.
 		/// </summary>
-		private IEnumerator SpawnAfterDelay()
+		private IEnumerator SpawnAfterDelay(int run)
 		{
 			yield return _enterDelayWait;
 			if (!IsRunning) yield break;
@@ -260,12 +267,24 @@ namespace RandomEvents.Events
 				yield break;
 			}
 
+			_delayToken = null;
 			foreach (var pair in table)
 			{
 				for (int i = 0; i < pair.Value; i++)
 				{
 					Vector2 spot = _tracker.Count == 0 ? anchor.Value : ClusterAround(anchor.Value);
-					var go = pair.Key.InstantiateAsync(spot, Quaternion.identity).WaitForCompletion();
+					AsyncOperationHandle<GameObject> handle = pair.Key.InstantiateAsync(spot, Quaternion.identity);
+					while (!handle.IsDone)
+					{
+						yield return null;
+					}
+
+					GameObject? go = handle.Status == AsyncOperationStatus.Succeeded ? handle.Result : null;
+					if (run != _run)
+					{
+						if (go != null) Object.Destroy(go);
+						yield break;
+					}
 					_tracker.Add(go);
 
 					// Recorded with its asset, so a co-op session can build the same creature on the other machine.
