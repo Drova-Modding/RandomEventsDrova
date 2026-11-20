@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.2 - Loading Fix
+- Regional events load their creatures one at a time without blocking the game. A spawn during a load could freeze it.
+
 ## 1.4.1 - Spider Fix
 - Glowing forest (Leuchtwald) events no longer spawn the `BigSpider_Leuchtwald_Spot_01` spider. That prefab can never die: it heals whenever its health reaches 0, so it always survived with one heart. The other Leuchtwald spider takes its spawn weight.
 
